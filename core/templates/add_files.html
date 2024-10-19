@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Add Files{% endblock %}
+
+{% block content %}
+<div class="min-h-screen p-6 bg-gradient-to-r from-blue-50 to-purple-50">
+    <div class="text-center mb-10">
+        <h1 class="text-5xl text-red-600 font-extrabold mt-16">Add Notes</h1>
+    </div>
+
+    {% if messages %}
+    <ul class="mb-4">
+        {% for message in messages %}
+        <li class="p-2 {% if message.tags == 'success' %}bg-green-500 text-white{% else %}bg-red-500 text-white{% endif %} rounded shadow-md">
+            {{ message }}
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <div class="px-6 py-4">
+        <div class="space-y-6">
+            <!-- Create Folder Form -->
+            <form method="post" action="{% url 'create_folder' user_id current_folder %}" enctype="multipart/form-data" class="bg-white p-4 rounded-lg shadow-lg">
+                {% csrf_token %}
+                <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
+                    <input type="text" name="folder_name" placeholder="New folder name" required class="border border-gray-300 p-2 rounded w-full md:w-1/2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-200">Create Folder</button>
+                </div>
+            </form>
+
+            <!-- Upload File Form -->
+            {% if current_folder %}
+            <form method="POST" action="{% url 'upload_file' user_id current_folder %}" enctype="multipart/form-data" class="bg-white p-4 rounded-lg shadow-lg">
+                {% csrf_token %}
+                <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
+                    <input type="text" name="file_name" placeholder="New File name" required class="border border-gray-300 p-2 rounded w-full md:w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <input type="file" name="file" required class="border border-gray-300 p-2 rounded w-full md:w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200">Upload File</button>
+                </div>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Folders Table -->
+    <div class="px-6 py-4 flex justify-center">
+        <table class="min-w-full bg-white shadow-lg rounded-lg border border-gray-300">
+            <thead class="bg-gradient-to-r from-blue-400 to-purple-400 text-white rounded-t-lg">
+                <tr>
+                    <th class="py-4 px-6 text-left text-lg font-semibold">Folder Name</th>
+                    <th class="py-4 px-6 text-left text-lg font-semibold">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-300">
+                {% for folder in subfolders %}
+                <tr class="hover:bg-gradient-to-r from-purple-100 to-blue-100 transition duration-200 cursor-pointer">
+                    <td class="py-4 px-6 text-gray-800 text-lg">
+                        <a href="{% url 'add_files' user_id folder.id %}" class="flex justify-between items-center w-full h-full">{{ folder.name }}</a>
+                    </td>
+                    <td class="py-4 px-6 text-gray-800 text-lg">
+                        <div class="flex justify-center space-x-2">
+                            <a href="{% url 'add_files' user_id folder.id %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">Open</a>
+                            <a href="{% url 'delete_folder' user_id folder.id %}" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% for file in files %}
+                <tr class="hover:bg-gradient-to-r from-purple-100 to-blue-100 transition duration-200 cursor-pointer">
+                    <td class="py-4 px-6 text-gray-800 text-lg">
+                        <p>{{ file.name }}</p>
+                    </td>
+                    <td class="py-4 px-6 text-gray-800 text-lg">
+                        <div class="flex justify-center space-x-2">
+                            <a href="{{ file.downloadable_url }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded" download>Download</a>
+                            <a href="{% url 'delete_file' user_id file.id %}" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Delete</a>
+                            <form method="POST" action="{% url 'edit_file' user_id file.id %}" class="flex items-center">
+                                {% csrf_token %}
+                                <input type="text" name="file_name" placeholder="New File Name" required class="border border-gray-300 p-1 rounded w-auto focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                <button type="submit" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded">Edit</button>
+                            </form>
+                            <a href="{{ file.file.url }}" target="_blank" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">Open</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,657 @@
+{% extends "base.html" %}
+
+{% block title %}Circuit{% endblock %}
+
+{% block content %}
+<div class="min-h-screen p-4 mt-16">
+    <h2 class="text-2xl font-bold mb-4">Circuit From Expression</h2>
+    <form id="expressionForm" class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
+        <input type="text" id="inputExpression" placeholder="Enter expression" class="w-full md:w-1/2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <button type="submit" class="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            Get The Circuit
+        </button>
+    </form>
+
+    <h3 class="text-xl font-semibold mt-8">Circuit</h3>
+    <div class="flex items-center mt-4">
+        <button id="zoomIn" class="bg-blue-500 text-white p-2 rounded-md mr-2 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Zoom In</button>
+        <button id="zoomOut" class="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Zoom Out</button>
+        <button id="downloadPDF" class="bg-green-500 text-white p-2 rounded-md ml-2 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500">Download</button>
+    </div>
+    <div id="stackFrame" class="border border-gray-300 p-4 mt-4 w-full h-100 md:w-3/4 overflow-auto">
+        <div id="stackContent" class="transform transition-transform">
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+    h2 {
+        margin-bottom: 10px;
+    }
+    input {
+        margin-right: 10px;
+    }
+
+    svg {
+        display: block;
+    }
+</style>
+<script>
+    const { jsPDF } = window.jspdf;
+    const stackContent = document.getElementById('stackContent');
+    let scale = 1; 
+    const MIN_SCALE = 0.5; 
+    const MAX_SCALE = 1;
+
+    document.getElementById('zoomIn').addEventListener('click', () => {
+        if (scale < MAX_SCALE) { 
+            scale += 0.1; 
+            stackContent.style.transform = `scale(${scale})`; 
+        }
+    });
+
+    document.getElementById('zoomOut').addEventListener('click', () => {
+        if (scale > MIN_SCALE) { 
+            scale -= 0.1; 
+            stackContent.style.transform = `scale(${scale})`; 
+        }
+    });
+
+    document.getElementById('downloadPDF').addEventListener('click', () => {
+    // Create a temporary container to capture the content
+        const tempContainer = document.createElement('div');
+        document.body.appendChild(tempContainer);
+        
+        // Clone the stackContent and append to the tempContainer
+        const clonedContent = stackContent.cloneNode(true);
+        clonedContent.style.transform = `scale(${scale})`; // Apply the current scale
+        clonedContent.style.transformOrigin = 'top left'; // Set transform origin for proper scaling
+        clonedContent.style.width = `${stackContent.offsetWidth}px`; // Set the width
+        clonedContent.style.height = `${stackContent.offsetHeight}px`; // Set the height
+        tempContainer.appendChild(clonedContent);
+
+        // Use html2canvas to capture the full content of the temporary container
+        html2canvas(tempContainer, { scale: 2 }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('l', 'mm', 'a4'); // Landscape orientation
+
+            // Calculate the dimensions for the PDF based on the canvas size
+            const imgWidth = pdf.internal.pageSize.getWidth(); 
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            // Add the captured image to the PDF
+            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+            pdf.save('stack-content.pdf');
+
+            // Clean up the temporary container
+            document.body.removeChild(tempContainer);
+        }).catch((error) => {
+            console.error("Error generating PDF: ", error);
+        });
+    });
+
+    const isOperand = (char) => /^[a-zA-Z]+$/.test(char);
+    const getPositionX = (char,variables) => {
+        const variable = variables.find(variable => variable.name === char);
+        return variable ? variable.positionX : null;
+    };
+    const getStepY = (step,stepsY) => {
+        const variable = stepsY.find(variable => variable.num === step);
+        return variable ? variable : null;
+    };
+
+    
+
+    const evaluateExpression = (result,str) => {
+        const variables = [];
+        const stepsY = [];
+        let disOfVar = 10;
+        let heightofVar = 20;
+        let gateX = 400;
+        let gateY = 60;
+        const tempStack = [];
+        str = `<svg width="10000" height="1000" xmlns="http://www.w3.org/2000/svg">`;
+
+        for (let char of result) {
+            if (isOperand(char)) {
+                if (!variables.some(variable => variable.name === char)) {
+                    str += `
+                        <text x=${disOfVar} y="40" font-family="Verdana" font-size="25" fill="black">${char}</text>
+                        <line x1=${disOfVar + 7} y1="50" x2=${disOfVar + 7} y2="1025" stroke="black" stroke-width="2" />
+                    `;
+
+                    const variable = {
+                        name: char,
+                        positionX: disOfVar + 7
+                    };
+                    variables.push(variable);
+                    disOfVar += 30;
+                }
+            }
+        }
+
+        let stepDuration = disOfVar + 100;
+
+        for (let char of result) {
+            if (isOperand(char)) {
+                const stackVar = {
+                    name: char,
+                    position: 0,
+                    positionX: getPositionX(char,variables),
+                    gateOutX: -1,
+                    gateOutY: -1,
+                    isNot: false
+                };
+                tempStack.push(stackVar);
+            } else {
+                if (char === '\'') {
+                    const operand1 = tempStack.pop();
+                    operand1.isNot = true;
+                    tempStack.push(operand1);
+                } else {
+                    const operand2 = tempStack.pop();
+                    const operand1 = tempStack.pop();
+
+                    const step = 1 + (operand1.position >= operand2.position ? operand1.position : operand2.position);
+                    let outX = -1;
+                    let outY = -1;
+
+                    if (char === '*') {
+                        let sty = gateY;
+                        let stx = stepDuration;
+                        if (!stepsY.some(variable => variable.num === step)) {
+                            const varb = {
+                                num: step,
+                                gateX: stepDuration,
+                                gateY: gateY
+                            };
+                            stepsY.push(varb);
+                            stepDuration += disOfVar + 100;
+                            gateY += 50;
+                        } else {
+                            const temp = getStepY(step,stepsY);
+                            sty = temp.gateY + 100;
+                            stx = temp.gateX;
+                            temp.gateY += 100;
+                        }
+
+                        str += `<path d="M ${stx} ${sty} C ${stx + 40} ${sty}, ${stx + 40} ${sty + 50}, ${stx} ${sty + 50} M ${stx} ${sty} L ${stx} ${sty + 50}" stroke="black" fill="transparent" stroke-width="2" />`;
+                        outX = getStepY(step,stepsY).gateX + 30;
+                        outY = getStepY(step,stepsY).gateY + 25;
+                    }
+
+                    if (char === '+') {
+                        let sty = gateY;
+                        let stx = stepDuration;
+                        if (!stepsY.some(variable => variable.num === step)) {
+                            const varb = {
+                                num: step,
+                                gateX: stepDuration,
+                                gateY: gateY
+                            };
+                            stepsY.push(varb);
+                            stepDuration += disOfVar + 100;
+                            gateY += 50;
+                        } else {
+                            const temp = getStepY(step,stepsY);
+                            sty = temp.gateY + 100;
+                            stx = temp.gateX;
+                            temp.gateY += 100;
+                        }
+
+                        str += `<path d="M ${stx} ${sty} C ${stx + 35} ${sty + 5}, ${stx + 30} ${sty + 10}, ${stx + 45} ${sty + 27}" stroke="black" fill="transparent" stroke-width="2" />
+                                <path d="M ${stx} ${sty + 54} C ${stx + 35} ${sty + 48}, ${stx + 30} ${sty + 43}, ${stx + 45} ${sty + 27}" stroke="black" fill="transparent" stroke-width="2" />
+                                <path d="M ${stx} ${sty} C ${stx + 10} ${sty + 10}, ${stx + 10} ${sty + 40}, ${stx} ${sty + 54}" stroke="black" fill="transparent" stroke-width="2" />`;
+                        outX = getStepY(step,stepsY).gateX + 45;
+                        outY = getStepY(step,stepsY).gateY + 27;
+                    }
+
+                    if (operand1.name.length === 1 && operand2.name.length === 1) {
+                        let x = 0;
+                        if (char === '+') x += 5;
+
+                        let temp = getStepY(step,stepsY).gateY + 40;
+                        if (temp >= heightofVar) {
+                        if (!operand1.isNot) {
+                            str += `<line x1=${operand1.positionX} y1=${getStepY(step,stepsY).gateY + 10} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 10} stroke="black" stroke-width="2" />
+                        <circle cx=${operand1.positionX} cy=${getStepY(step,stepsY).gateY + 10} r="4"/>`;
+                        }
+                        else {
+                            str += `<line x1=${operand1.positionX} y1=${getStepY(step,stepsY).gateY + 10} x2=${getStepY(step,stepsY).gateX + x - 50} y2=${getStepY(step,stepsY).gateY + 10} stroke="black" stroke-width="2" />
+                            <path d="M ${getStepY(step,stepsY).gateX + x - 50} ${getStepY(step,stepsY).gateY} L ${getStepY(step,stepsY).gateX + x - 50 + 15} ${getStepY(step,stepsY).gateY + 10} L ${getStepY(step,stepsY).gateX + x - 50} ${getStepY(step,stepsY).gateY + 20} Z" stroke="black" fill="transparent" stroke-width="2" />
+                            <circle cx=${getStepY(step,stepsY).gateX + x - 50 + 19} cy=${getStepY(step,stepsY).gateY + 10} r="3" fill="none" stroke="black" stroke-width="2"/>
+                            <line x1=${getStepY(step,stepsY).gateX + x - 50 + 23} y1=${getStepY(step,stepsY).gateY + 10} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 10} stroke="black" stroke-width="2" />
+                            <circle cx=${operand1.positionX} cy=${getStepY(step,stepsY).gateY + 10} r="4"/>`;
+                        }
+
+                        if (!operand2.isNot) {
+                            str += `<line x1=${operand2.positionX} y1=${getStepY(step,stepsY).gateY + 40} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                        <circle cx=${operand2.positionX} cy=${getStepY(step,stepsY).gateY + 40} r="4"/>`;
+                        }
+                        else {
+                            str += `<line x1=${operand2.positionX} y1=${getStepY(step,stepsY).gateY + 40} x2=${getStepY(step,stepsY).gateX + x - 50} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                            <path d="M ${getStepY(step,stepsY).gateX + x - 50} ${getStepY(step,stepsY).gateY + 30} L ${getStepY(step,stepsY).gateX + x - 50 + 15} ${getStepY(step,stepsY).gateY + 40} L ${getStepY(step,stepsY).gateX + x - 50} ${getStepY(step,stepsY).gateY + 50} Z" stroke="black" fill="transparent" stroke-width="2" />
+                            <circle cx=${getStepY(step,stepsY).gateX + x - 50 + 19} cy=${getStepY(step,stepsY).gateY + 40} r="3" fill="none" stroke="black" stroke-width="2"/>
+                            <line x1=${getStepY(step,stepsY).gateX + x - 50 + 23} y1=${getStepY(step,stepsY).gateY + 40} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                            <circle cx=${operand2.positionX} cy=${getStepY(step,stepsY).gateY + 40} r="4"/>`;
+                        }
+
+                        heightofVar = temp + 50;
+                        }
+                        else {
+                        let x = 0;
+                        if (char === '+') x += 5;
+
+                        if (!operand1.isNot) {
+                            str += `<line x1=${operand1.positionX} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 30} y2=${heightofVar} stroke="black" stroke-width="2" />
+                        <circle cx=${operand1.positionX} cy=${heightofVar} r="4"/>
+                        <line x1=${getStepY(step,stepsY).gateX - 30} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 30} y2=${getStepY(step,stepsY).gateY + 10} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 30} y1=${getStepY(step,stepsY).gateY + 10} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 10} stroke="black" stroke-width="2" />
+                        `;
+                        }
+                        else {
+                            str += `<line x1=${operand1.positionX} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 30 - 53} y2=${heightofVar} stroke="black" stroke-width="2" />
+                        <circle cx=${operand1.positionX} cy=${heightofVar} r="4"/>
+                        <path d="M ${getStepY(step,stepsY).gateX - 30 - 53} ${heightofVar - 10} L ${getStepY(step,stepsY).gateX - 30 - 53 + 15} ${heightofVar} L ${getStepY(step,stepsY).gateX - 30 - 53} ${heightofVar + 10} Z" stroke="black" fill="transparent" stroke-width="2" />
+                            <circle cx=${getStepY(step,stepsY).gateX - 30 - 53 + 19} cy=${heightofVar} r="3" fill="none" stroke="black" stroke-width="2"/>
+                            <line x1=${getStepY(step,stepsY).gateX - 30 - 53 + 23} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 30} y2=${heightofVar} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 30} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 30} y2=${getStepY(step,stepsY).gateY + 10} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 30} y1=${getStepY(step,stepsY).gateY + 10} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 10} stroke="black" stroke-width="2" />
+                        `;
+                        }
+                        heightofVar += 30;
+
+                        if (!operand2.isNot) {
+                            str += `<line x1=${operand2.positionX} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 40} y2=${heightofVar} stroke="black" stroke-width="2" />
+                        <circle cx=${operand2.positionX} cy=${heightofVar} r="4"/>
+                        <line x1=${getStepY(step,stepsY).gateX - 40} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 40} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 40} y1=${getStepY(step,stepsY).gateY + 40} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                        `;
+                        }
+                        else {
+                            str += `<line x1=${operand2.positionX} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 40 - 53} y2=${heightofVar} stroke="black" stroke-width="2" />
+                        <circle cx=${operand2.positionX} cy=${heightofVar} r="4"/>
+                        <path d="M ${getStepY(step,stepsY).gateX - 40 - 53} ${heightofVar - 10} L ${getStepY(step,stepsY).gateX - 40 - 53 + 15} ${heightofVar} L ${getStepY(step,stepsY).gateX - 40 - 53} ${heightofVar + 10} Z" stroke="black" fill="transparent" stroke-width="2" />
+                            <circle cx=${getStepY(step,stepsY).gateX - 40 - 53 + 19} cy=${heightofVar} r="3" fill="none" stroke="black" stroke-width="2"/>
+                            <line x1=${getStepY(step,stepsY).gateX - 40 - 53 + 23} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 40} y2=${heightofVar} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 40} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 40} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 40} y1=${getStepY(step,stepsY).gateY + 40} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                        `;
+                        }
+                        heightofVar += 50;
+                        }
+
+                    }
+
+                    else if (operand1.name.length === 1 && operand2.name.length !== 1) {
+                    let x = 0;
+                    if (char === '+') x += 5;
+
+                    if (!operand2.isNot) {
+                    str += `<line x1=${operand2.gateOutX} y1=${operand2.gateOutY} x2=${getStepY(step,stepsY).gateX - 40} y2=${operand2.gateOutY} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 40} y1=${operand2.gateOutY} x2=${getStepY(step,stepsY).gateX - 40} y2=${getStepY(step,stepsY).gateY + 10} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 40} y1=${getStepY(step,stepsY).gateY + 10} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 10} stroke="black" stroke-width="2" />
+                        `;
+                    }
+                    else {
+                    str += `<line x1=${operand2.gateOutX} y1=${operand2.gateOutY} x2=${getStepY(step,stepsY).gateX - 40 - 53} y2=${operand2.gateOutY} stroke="black" stroke-width="2" />
+                        <path d="M ${getStepY(step,stepsY).gateX - 40 - 53} ${operand2.gateOutY - 10} L ${getStepY(step,stepsY).gateX - 40 - 53 + 15} ${operand2.gateOutY} L ${getStepY(step,stepsY).gateX - 40 - 53} ${operand2.gateOutY + 10} Z" stroke="black" fill="transparent" stroke-width="2" />
+                        <circle cx=${getStepY(step,stepsY).gateX - 40 - 53 + 19} cy=${operand2.gateOutY} r="3" fill="none" stroke="black" stroke-width="2"/>
+                        <line x1=${getStepY(step,stepsY).gateX - 40 - 53 + 23} y1=${operand2.gateOutY} x2=${getStepY(step,stepsY).gateX - 40} y2=${operand2.gateOutY} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 40} y1=${operand2.gateOutY} x2=${getStepY(step,stepsY).gateX - 40} y2=${getStepY(step,stepsY).gateY + 10} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 40} y1=${getStepY(step,stepsY).gateY + 10} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 10} stroke="black" stroke-width="2" />
+                        `;
+                    }
+
+                    let temp = getStepY(step,stepsY).gateY + 40;
+                    if (temp >= heightofVar) {
+                    if (!operand1.isNot) {
+                        str += `<line x1=${operand1.positionX} y1=${getStepY(step,stepsY).gateY + 40} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                    <circle cx=${operand1.positionX} cy=${getStepY(step,stepsY).gateY + 40} r="4"/>`;
+                    }
+                    else {
+                        str += `<line x1=${operand1.positionX} y1=${getStepY(step,stepsY).gateY + 40} x2=${getStepY(step,stepsY).gateX + x - 50} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                        <path d="M ${getStepY(step,stepsY).gateX + x - 50} ${getStepY(step,stepsY).gateY + 30} L ${getStepY(step,stepsY).gateX + x - 50 + 15} ${getStepY(step,stepsY).gateY + 40} L ${getStepY(step,stepsY).gateX + x - 50} ${getStepY(step,stepsY).gateY + 50} Z" stroke="black" fill="transparent" stroke-width="2" />
+                        <circle cx=${getStepY(step,stepsY).gateX + x - 50 + 19} cy=${getStepY(step,stepsY).gateY + 40} r="3" fill="none" stroke="black" stroke-width="2"/>
+                        <line x1=${getStepY(step,stepsY).gateX + x - 50 + 23} y1=${getStepY(step,stepsY).gateY + 40} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                        <circle cx=${operand1.positionX} cy=${getStepY(step,stepsY).gateY + 40} r="4"/>`;
+                    }
+                    heightofVar = temp + 50;
+                    }
+                    else {
+                    if (!operand1.isNot) {
+                        str += `<line x1=${operand1.positionX} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 30} y2=${heightofVar} stroke="black" stroke-width="2" />
+                    <circle cx=${operand1.positionX} cy=${heightofVar} r="4"/>
+                    <line x1=${getStepY(step,stepsY).gateX - 30} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 30} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                    <line x1=${getStepY(step,stepsY).gateX - 30} y1=${getStepY(step,stepsY).gateY + 40} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                    `;
+                    }
+                    else {
+                        str += `<line x1=${operand1.positionX} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 30 - 53} y2=${heightofVar} stroke="black" stroke-width="2" />
+                    <circle cx=${operand1.positionX} cy=${heightofVar} r="4"/>
+                    <path d="M ${getStepY(step,stepsY).gateX - 30 - 53} ${heightofVar - 10} L ${getStepY(step,stepsY).gateX - 30 - 53 + 15} ${heightofVar} L ${getStepY(step,stepsY).gateX - 30 - 53} ${heightofVar + 10} Z" stroke="black" fill="transparent" stroke-width="2" />
+                        <circle cx=${getStepY(step,stepsY).gateX - 30 - 53 + 19} cy=${heightofVar} r="3" fill="none" stroke="black" stroke-width="2"/>
+                        <line x1=${getStepY(step,stepsY).gateX - 30 - 53 + 23} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 30} y2=${heightofVar} stroke="black" stroke-width="2" />
+                    <line x1=${getStepY(step,stepsY).gateX - 30} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 30} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                    <line x1=${getStepY(step,stepsY).gateX - 30} y1=${getStepY(step,stepsY).gateY + 40} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                    `;
+                    }
+                    heightofVar += 50;
+                    }
+                }
+                else if (operand1.name.length !== 1 && operand2.name.length === 1) {
+                    let x = 0;
+                    if (char === '+') x += 5;
+
+                    if (!operand1.isNot) {
+                    str += `<line x1=${operand1.gateOutX} y1=${operand1.gateOutY} x2=${getStepY(step,stepsY).gateX - 40} y2=${operand1.gateOutY} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 40} y1=${operand1.gateOutY} x2=${getStepY(step,stepsY).gateX - 40} y2=${getStepY(step,stepsY).gateY + 10} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 40} y1=${getStepY(step,stepsY).gateY + 10} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 10} stroke="black" stroke-width="2" />
+                        `;
+                    }
+                    else {
+                    str += `<line x1=${operand1.gateOutX} y1=${operand1.gateOutY} x2=${getStepY(step,stepsY).gateX - 40 - 53} y2=${operand1.gateOutY} stroke="black" stroke-width="2" />
+                        <path d="M ${getStepY(step,stepsY).gateX - 40 - 53} ${operand1.gateOutY - 10} L ${getStepY(step,stepsY).gateX - 40 - 53 + 15} ${operand1.gateOutY} L ${getStepY(step,stepsY).gateX - 40 - 53} ${operand1.gateOutY + 10} Z" stroke="black" fill="transparent" stroke-width="2" />
+                        <circle cx=${getStepY(step,stepsY).gateX - 40 - 53 + 19} cy=${operand1.gateOutY} r="3" fill="none" stroke="black" stroke-width="2"/>
+                        <line x1=${getStepY(step,stepsY).gateX - 40 - 53 + 23} y1=${operand1.gateOutY} x2=${getStepY(step,stepsY).gateX - 40} y2=${operand1.gateOutY} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 40} y1=${operand1.gateOutY} x2=${getStepY(step,stepsY).gateX - 40} y2=${getStepY(step,stepsY).gateY + 10} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 40} y1=${getStepY(step,stepsY).gateY + 10} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 10} stroke="black" stroke-width="2" />
+                        `;
+                    }
+
+                    let temp = getStepY(step,stepsY).gateY + 40;
+                    if (temp >= heightofVar) {
+                    if (!operand2.isNot) {
+                        str += `<line x1=${operand2.positionX} y1=${getStepY(step,stepsY).gateY + 40} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                    <circle cx=${operand2.positionX} cy=${getStepY(step,stepsY).gateY + 40} r="4"/>`;
+                    }
+                    else {
+                        str += `<line x1=${operand2.positionX} y1=${getStepY(step,stepsY).gateY + 40} x2=${getStepY(step,stepsY).gateX + x - 50} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                        <path d="M ${getStepY(step,stepsY).gateX + x - 50} ${getStepY(step,stepsY).gateY + 30} L ${getStepY(step,stepsY).gateX + x - 50 + 15} ${getStepY(step,stepsY).gateY + 40} L ${getStepY(step,stepsY).gateX + x - 50} ${getStepY(step,stepsY).gateY + 50} Z" stroke="black" fill="transparent" stroke-width="2" />
+                        <circle cx=${getStepY(step,stepsY).gateX + x - 50 + 19} cy=${getStepY(step,stepsY).gateY + 40} r="3" fill="none" stroke="black" stroke-width="2"/>
+                        <line x1=${getStepY(step,stepsY).gateX + x - 50 + 23} y1=${getStepY(step,stepsY).gateY + 40} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                        <circle cx=${operand2.positionX} cy=${getStepY(step,stepsY).gateY + 40} r="4"/>`;
+                    }
+                    heightofVar = temp + 50;
+
+                    }
+                    else {
+
+                    if (!operand2.isNot) {
+                        str += `<line x1=${operand2.positionX} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 30} y2=${heightofVar} stroke="black" stroke-width="2" />
+                    <circle cx=${operand2.positionX} cy=${heightofVar} r="4"/>
+                    <line x1=${getStepY(step,stepsY).gateX - 30} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 30} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                    <line x1=${getStepY(step,stepsY).gateX - 30} y1=${getStepY(step,stepsY).gateY + 40} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                    `;
+                    }
+                    else {
+                        str += `<line x1=${operand2.positionX} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 30 - 53} y2=${heightofVar} stroke="black" stroke-width="2" />
+                    <circle cx=${operand2.positionX} cy=${heightofVar} r="4"/>
+                    <path d="M ${getStepY(step,stepsY).gateX - 30 - 53} ${heightofVar - 10} L ${getStepY(step,stepsY).gateX - 30 - 53 + 15} ${heightofVar} L ${getStepY(step,stepsY).gateX - 30 - 53} ${heightofVar + 10} Z" stroke="black" fill="transparent" stroke-width="2" />
+                        <circle cx=${getStepY(step,stepsY).gateX - 30 - 53 + 19} cy=${heightofVar} r="3" fill="none" stroke="black" stroke-width="2"/>
+                        <line x1=${getStepY(step,stepsY).gateX - 30 - 53 + 23} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 30} y2=${heightofVar} stroke="black" stroke-width="2" />
+                    <line x1=${getStepY(step,stepsY).gateX - 30} y1=${heightofVar} x2=${getStepY(step,stepsY).gateX - 30} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                    <line x1=${getStepY(step,stepsY).gateX - 30} y1=${getStepY(step,stepsY).gateY + 40} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                    `;
+                    }
+                    heightofVar += 50;
+                    }
+
+                }
+                else {
+                    let x = 0;
+                    if (char === '+') x += 5;
+
+                    if (!operand1.isNot) {
+                    str += `<line x1=${operand1.gateOutX} y1=${operand1.gateOutY} x2=${getStepY(step,stepsY).gateX - 40} y2=${operand1.gateOutY} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 40} y1=${operand1.gateOutY} x2=${getStepY(step,stepsY).gateX - 40} y2=${getStepY(step,stepsY).gateY + 10} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 40} y1=${getStepY(step,stepsY).gateY + 10} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 10} stroke="black" stroke-width="2" />
+                        `;
+                    }
+                    else {
+                    str += `<line x1=${operand1.gateOutX} y1=${operand1.gateOutY} x2=${getStepY(step,stepsY).gateX - 40 - 53} y2=${operand1.gateOutY} stroke="black" stroke-width="2" />
+                        <path d="M ${getStepY(step,stepsY).gateX - 40 - 53} ${operand1.gateOutY - 10} L ${getStepY(step,stepsY).gateX - 40 - 53 + 15} ${operand1.gateOutY} L ${getStepY(step,stepsY).gateX - 40 - 53} ${operand1.gateOutY + 10} Z" stroke="black" fill="transparent" stroke-width="2" />
+                        <circle cx=${getStepY(step,stepsY).gateX - 40 - 53 + 19} cy=${operand1.gateOutY} r="3" fill="none" stroke="black" stroke-width="2"/>
+                        <line x1=${getStepY(step,stepsY).gateX - 40 - 53 + 23} y1=${operand1.gateOutY} x2=${getStepY(step,stepsY).gateX - 40} y2=${operand1.gateOutY} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 40} y1=${operand1.gateOutY} x2=${getStepY(step,stepsY).gateX - 40} y2=${getStepY(step,stepsY).gateY + 10} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 40} y1=${getStepY(step,stepsY).gateY + 10} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 10} stroke="black" stroke-width="2" />
+                        `;
+                    }
+
+
+                    if (!operand2.isNot) {
+                    str += `<line x1=${operand2.gateOutX} y1=${operand2.gateOutY} x2=${getStepY(step,stepsY).gateX - 30} y2=${operand2.gateOutY} stroke="black" stroke-width="2" />
+                    <line x1=${getStepY(step,stepsY).gateX - 30} y1=${operand2.gateOutY} x2=${getStepY(step,stepsY).gateX - 30} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                    <line x1=${getStepY(step,stepsY).gateX - 30} y1=${getStepY(step,stepsY).gateY + 40} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                    `;
+                    }
+                    else {
+                    str += `<line x1=${operand2.gateOutX} y1=${operand2.gateOutY} x2=${getStepY(step,stepsY).gateX - 30 - 53} y2=${operand2.gateOutY} stroke="black" stroke-width="2" />
+                        <path d="M ${getStepY(step,stepsY).gateX - 30 - 53} ${operand2.gateOutY - 10} L ${getStepY(step,stepsY).gateX - 30 - 53 + 15} ${operand2.gateOutY} L ${getStepY(step,stepsY).gateX - 30 - 53} ${operand2.gateOutY + 10} Z" stroke="black" fill="transparent" stroke-width="2" />
+                        <circle cx=${getStepY(step,stepsY).gateX - 30 - 53 + 19} cy=${operand2.gateOutY} r="3" fill="none" stroke="black" stroke-width="2"/>
+                        <line x1=${getStepY(step,stepsY).gateX - 30 - 53 + 23} y1=${operand2.gateOutY} x2=${getStepY(step,stepsY).gateX - 30} y2=${operand2.gateOutY} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 30} y1=${operand2.gateOutY} x2=${getStepY(step,stepsY).gateX - 30} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                        <line x1=${getStepY(step,stepsY).gateX - 30} y1=${getStepY(step,stepsY).gateY + 40} x2=${getStepY(step,stepsY).gateX + x} y2=${getStepY(step,stepsY).gateY + 40} stroke="black" stroke-width="2" />
+                        `;
+                    }
+                }
+
+                const combined = `${operand1.name}${char}${operand2.name}`;
+
+                const stackVar = {
+                    name: combined,
+                    position: step,
+                    positionX: 0,
+                    gateOutX: outX,
+                    gateOutY: outY,
+                    isNot: false
+                };
+                // str += `<line x1=${outX} y1=${outY} x2=${outX+5} y2=${outY} stroke="black" stroke-width="2" />`;
+
+                tempStack.push(stackVar);
+
+                }
+            }
+        }
+        const lastElement = tempStack.pop();
+
+        if (lastElement.name.length === 1) {
+        str += `<line x1=${lastElement.positionX} y1=${heightofVar + 100} x2=${lastElement.positionX + 150} y2=${heightofVar + 100} stroke="black" stroke-width="2" />
+            <path d="M ${lastElement.positionX + 150} ${heightofVar + 100 - 10} L ${lastElement.positionX + 150 + 15} ${heightofVar + 100} L ${lastElement.positionX + 150} ${heightofVar + 100 + 10} Z" stroke="black" fill="transparent" stroke-width="2" />
+                    <circle cx=${lastElement.positionX + 150 + 19} cy=${heightofVar + 100} r="3" fill="none" stroke="black" stroke-width="2"/>
+                    <line x1=${lastElement.positionX + 150 + 23} y1=${heightofVar + 100} x2=${lastElement.positionX + 150 + 100} y2=${heightofVar + 100} stroke="black" stroke-width="2" />
+                    `;
+        }
+        else {
+        if (!lastElement.isNot) str += `<line x1=${lastElement.gateOutX} y1=${lastElement.gateOutY} x2=${lastElement.gateOutX + 150} y2=${lastElement.gateOutY} stroke="black" stroke-width="2" />`;
+        else {
+            str += `<line x1=${lastElement.gateOutX} y1=${lastElement.gateOutY} x2=${lastElement.gateOutX + 100} y2=${lastElement.gateOutY} stroke="black" stroke-width="2" />
+            <path d="M ${lastElement.gateOutX + 100} ${lastElement.gateOutY - 10} L ${lastElement.gateOutX + 100 + 15} ${lastElement.gateOutY} L ${lastElement.gateOutX + 100} ${lastElement.gateOutY + 10} Z" stroke="black" fill="transparent" stroke-width="2" />
+                    <circle cx=${lastElement.gateOutX + 100 + 19} cy=${lastElement.gateOutY} r="3" fill="none" stroke="black" stroke-width="2"/>
+                    <line x1=${lastElement.gateOutX + 100 + 23} y1=${lastElement.gateOutY} x2=${lastElement.gateOutX + 100 + 100} y2=${lastElement.gateOutY} stroke="black" stroke-width="2" />
+                    `;
+        }
+        }
+        str += '</svg>';
+        document.getElementById('stackContent').innerHTML = str;
+        console.log(str)
+    };
+
+    const shuntingYardAlgorithm = (infix) => {
+    const ops = {
+        '+': 1,
+        '*': 2,
+        '/': 2,
+        '(': 0,
+        ')': 0
+    };
+
+    const output = [];
+    const stack = [];
+
+    for (let i = 0; i < infix.length; i++) {
+        let token = infix[i];
+
+        if (/[A-Z]/.test(token)) {
+
+        if (infix[i + 1] === "'") {
+            output.push(token + "'");
+            i++;
+        } else {
+            output.push(token);
+        }
+        } else if (token === '(') {
+        stack.push(token);
+        } else if (token === ')') {
+        let top = stack.pop();
+        while (top !== '(') {
+            output.push(top);
+            top = stack.pop();
+        }
+        } else if (['+', '*', '/', "'"].includes(token)) {
+        if (token === "'") {
+
+            output[output.length - 1] += "'";
+        } else {
+            while (stack.length && ops[stack[stack.length - 1]] >= ops[token]) {
+            output.push(stack.pop());
+            }
+            stack.push(token);
+        }
+        }
+    }
+
+
+    while (stack.length) {
+        output.push(stack.pop());
+    }
+
+    return output.join('');
+    };
+
+    document.getElementById('expressionForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const input = document.getElementById('inputExpression').value;
+        let str = '';
+        // Validate the input expression
+        if (!isValidExpression(input)) {
+            alert('Invalid expression! Please use only single-letter variables (A-Z, a-z), operators (+,\'), and parentheses ((),), No Space is allowed. You should maintain standard expression rule');
+            return;
+        }
+
+        // Convert the expression to insert '*' between concatenated variables
+        const modifiedExpression = convertExpression(input);
+        
+        console.log(modifiedExpression);
+        
+        const infix = modifiedExpression.replace(/\s+/g, '').split('');
+        console.log(infix);
+        
+        const result = shuntingYardAlgorithm(infix);
+        console.log(result);
+        evaluateExpression(result,str);
+    });
+
+    function convertExpression(expression) {
+        let modified = '';
+        for (let i = 0; i < expression.length; i++) {
+            modified += expression[i];
+
+
+            if (expression[i] === "'") {
+                // Check if the next character is a variable, ignoring any quotes
+                let nextChar = expression[i + 1];
+                if (i < expression.length - 1 && (/[A-Za-z]/.test(nextChar) || nextChar === '(')) {
+                        modified += '*'; // Insert multiplication
+                    }
+            }
+            
+            // Check if the current character is a variable (single letter)
+            if (/[A-Za-z]/.test(expression[i])) {
+                // Check if the next character is a variable or '('
+                let nextChar = expression[i + 1];
+                // Skip over any single quote
+                if (nextChar === "'") {
+                    continue;
+                    // nextChar = expression[i + 2]; // Move to the next character after the quote
+                    // if (i < expression.length - 2 && (/[A-Za-z]/.test(nextChar) || nextChar === '(')) {
+                    //     modified += '*'; // Insert multiplication
+                    // }
+                } else if (i < expression.length - 1 && (/[A-Za-z]/.test(nextChar) || nextChar === '(')) {
+                    modified += '*'; // Insert multiplication
+                }
+            }
+
+            // Check if the current character is a closing parenthesis
+            if (expression[i] === ')') {
+                // Check if the next character is a variable, ignoring any quotes
+                let nextChar = expression[i + 1];
+                if (nextChar === "'") {
+                    continue;
+                    // nextChar = expression[i + 2]; // Move to the next character after the quote
+                    // if (i < expression.length - 2 && /[A-Za-z]/.test(nextChar)) {
+                    //     modified += '*'; // Insert multiplication
+                    // }
+                } else if (i < expression.length - 1 && (/[A-Za-z]/.test(nextChar) || nextChar === '(')) {
+                    modified += '*'; // Insert multiplication
+                }
+            }
+        }
+        return modified;
+    }
+
+
+    function isValidExpression(expression) {
+    // Check if the expression contains only valid characters
+        const validPattern = /^[A-Za-z0-9()+']*$/;
+        if (!validPattern.test(expression)) {
+            return false; // Invalid characters
+        }
+
+        // Check for invalid sequences and unmatched parentheses
+        let balance = 0; // Parenthesis balance
+        let prevChar = ''; // Previous character
+
+        for (let i = 0; i < expression.length; i++) {
+            const currentChar = expression[i];
+
+            // Check for invalid starting characters
+            if (i === 0 && (currentChar === '+' || currentChar === "'")) {
+                return false; // Cannot start with + or '
+            }
+
+            // Check for invalid sequences
+            if (currentChar === '+' || currentChar === "'") {
+                // Prevent consecutive operators
+                if (prevChar === '+' || prevChar === "'") {
+                    return false; // Consecutive operators
+                }
+            } else if (currentChar === ')') {
+                // Prevent closing parenthesis after an operator
+                if (prevChar === '+') {
+                    return false; // Closing parenthesis after an operator
+                }
+                balance--; // Decrement balance for closing parenthesis
+            } else if (currentChar === '(') {
+                // Increment balance for opening parenthesis
+                balance++; // Increment balance for opening parenthesis
+            }
+
+            // Update previous character
+            prevChar = currentChar; 
+        }
+
+        // Check for unbalanced parentheses
+        if (balance !== 0) {
+            return false; // Unmatched parentheses
+        }
+
+        return true; // Valid expression
+    }
+
+</script>
+{% endblock %}

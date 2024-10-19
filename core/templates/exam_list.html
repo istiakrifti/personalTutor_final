@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Exam List{% endblock %}
+
+{% block content %}
+<div class="min-h-screen p-4">
+    <div class="text-blue-950 p-4 text-center">
+        <h1 class="text-2xl text-red-500 font-bold">All Exams</h1>
+    </div>
+
+    <div class="flex justify-center p-4">
+        <table class="min-w-full border-collapse block md:table">
+            <tbody class="block md:table-row-group">
+                {% for exam in exam_lists %}
+                <tr class="border border-grey-500 md:border-none block md:table-row">
+                    <td class="p-2 md:border text-center md:border-grey-500 block md:table-cell">{{ exam.title }}</td>
+                    <td class="p-2 md:border text-center md:border-grey-500 block md:table-cell">{{ exam.status }}</td>
+                    <td class="p-2 md:border text-center md:border-grey-500 block md:table-cell">
+                        <a href="{% url 'edit_exam' exam.id %}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 border border-yellow-500 rounded">Edit</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center py-2">No exams available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

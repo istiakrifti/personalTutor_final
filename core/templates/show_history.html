@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Show History{% endblock %}
+
+{% block content %}
+<div class="bg-gradient-to-r from-green-100 to-blue-200">
+<div class="bg-gradient-to-r from-green-100 to-blue-200 max-w-screen-md mx-auto mt-16 p-6 md:p-8 bg-white shadow-md rounded-lg">
+    <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-blue-900 mt-8 mb-4 text-center">Current Month Information</h2>
+    <div class="flex flex-col space-y-4">
+        <div class="flex justify-between p-4 md:p-6 bg-blue-50 rounded-lg shadow">
+            <span class="font-medium text-base md:text-lg text-gray-700">Current Month:</span>
+            <span id="current-month" class="text-base md:text-xl text-gray-900 font-semibold">{{ history.month_year }}</span>
+        </div>
+        <div class="flex justify-between p-4 md:p-6 bg-green-50 rounded-lg shadow">
+            <span class="font-medium text-base md:text-lg text-gray-700">Month Day Count:</span>
+            <span id="month-day-count" class="text-base md:text-xl text-gray-900 font-semibold">{{ history.daycount }}</span>
+        </div>
+        <div class="flex justify-between p-4 md:p-6 bg-yellow-50 rounded-lg shadow">
+            <span class="font-medium text-base md:text-lg text-gray-700">Total Day Count:</span>
+            <span id="total-day-count" class="text-base md:text-xl text-gray-900 font-semibold">{{ history.total_day_count }}</span>
+        </div>
+        <div class="flex justify-between p-4 md:p-6 bg-purple-50 rounded-lg shadow">
+            <span class="font-medium text-base md:text-lg text-gray-700">Last Topic:</span>
+            <span id="last-topic" class="text-base md:text-xl text-gray-900 font-semibold">{{ history.last_topic }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-screen-md mx-auto mt-8 p-6 md:p-8  shadow-md rounded-lg">
+    <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-blue-900 mb-4 text-center">Payment Status</h2>
+    <table class="min-w-full table-auto bg-white border-collapse rounded-lg overflow-hidden shadow">
+        <thead class="bg-gradient-to-r from-blue-500 to-green-500 text-white">
+            <tr>
+                <th class="px-4 py-2 md:px-6 md:py-4 text-left text-lg">Month-Year</th>
+                <th class="px-4 py-2 md:px-6 md:py-4 text-left text-lg">Payment Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in payment %}
+            <tr class="hover:bg-gray-100 transition duration-200">
+                <td class="border px-4 py-2 md:px-6 md:py-4 text-base md:text-lg">{{ entry.month_year }}</td>
+                <td class="border px-4 py-2 md:px-6 md:py-4 text-base md:text-lg {{ entry.payment_status|lower }}-status">
+                    {{ entry.payment_status }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<br><br>
+</div>
+<style>
+    /* Custom styles for payment status colors */
+    .paid-status {
+        background-color: #d1fae5; /* Light green for paid */
+        color: #065f46; /* Dark green text */
+        font-weight: bold;
+    }
+    .unpaid-status {
+        background-color: #fee2e2; /* Light red for unpaid */
+        color: #b91c1c; /* Dark red text */
+        font-weight: bold;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,199 @@
+{% if not user.is_authenticated or logged_in_user.role != 'admin' %}
+<div class="bg-gradient-to-r from-green-100 to-blue-200 min-h-screen mt-10">
+    <div class="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center items-center gap-10">
+        <!-- Card Row -->
+        <div class="flex-wrap justify-center mt-16 sm:px-6 md:px-8 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-10 lg:gap-20">
+            
+            <!-- Live Class Card -->
+            <a href="{% url 'live_class' %}">
+                <div class="relative overflow-hidden bg-gradient-to-r from-red-400 to-pink-500 ml-2 lg:ml-0 rounded-lg shadow-lg w-44 h-44 lg:w-60 lg:h-60 flex items-center justify-center transform transition-transform duration-300 hover:scale-105">
+                    <svg class="absolute bottom-0 left-0 mb-8" viewBox="0 0 375 283" fill="none" style="transform: scale(1.5); opacity: 0.1;">
+                        <rect x="159.52" y="175" width="152" height="152" rx="8" transform="rotate(-45 159.52 175)" fill="white" />
+                        <rect y="107.48" width="152" height="152" rx="8" transform="rotate(-45 0 107.48)" fill="white" />
+                    </svg>
+                    <i class="fas fa-video text-white text-5xl"></i> <!-- Icon for Live Class -->
+                    <div class="absolute bottom-4 text-white font-bold text-lg sm:text-xl md:text-2xl">Live Class</div>
+                </div>
+            </a>
+
+            <!-- Class Notes Card -->
+            <a href="{% url 'show_files' %}">
+                <div class="relative overflow-hidden bg-gradient-to-r from-teal-400 to-cyan-500 ml-2 lg:ml-0 rounded-lg shadow-lg w-44 h-44 lg:w-60 lg:h-60 flex items-center justify-center transform transition-transform duration-300 hover:scale-105">
+                    <svg class="absolute bottom-0 left-0 mb-8" viewBox="0 0 375 283" fill="none" style="transform: scale(1.5); opacity: 0.1;">
+                        <rect x="159.52" y="175" width="152" height="152" rx="8" transform="rotate(-45 159.52 175)" fill="white" />
+                        <rect y="107.48" width="152" height="152" rx="8" transform="rotate(-45 0 107.48)" fill="white" />
+                    </svg>
+                    <i class="fas fa-book text-white text-5xl"></i> <!-- Icon for Class Notes -->
+                    <div class="absolute bottom-4 text-white font-bold text-lg sm:text-xl md:text-2xl">Class Notes</div>
+                </div>
+            </a>
+
+            <!-- Upload Homework Card -->
+            <a href="{% url 'upload_hw' %}">
+                <div class="relative overflow-hidden bg-gradient-to-r from-purple-500 to-indigo-600 ml-2 lg:ml-0 rounded-lg shadow-lg w-44 h-44 lg:w-60 lg:h-60 flex items-center justify-center transform transition-transform duration-300 hover:scale-105">
+                    <svg class="absolute bottom-0 left-0 mb-8" viewBox="0 0 375 283" fill="none" style="transform: scale(1.5); opacity: 0.1;">
+                        <rect x="159.52" y="175" width="152" height="152" rx="8" transform="rotate(-45 159.52 175)" fill="white" />
+                        <rect y="107.48" width="152" height="152" rx="8" transform="rotate(-45 0 107.48)" fill="white" />
+                    </svg>
+                    <i class="fas fa-upload text-white text-5xl"></i> <!-- Icon for Upload HW -->
+                    <div class="absolute bottom-4 text-white font-bold text-lg sm:text-xl md:text-2xl">Upload HW</div>
+                </div>
+            </a>
+
+            <!-- Checked Homework Card -->
+            <a href="{% url 'show_checked_hw' %}">
+                <div class="relative overflow-hidden  bg-orange-500 ml-2 lg:ml-0 rounded-lg shadow-lg w-44 h-44 lg:w-60 lg:h-60 flex items-center justify-center transform transition-transform duration-300 hover:scale-105">
+                    <svg class="absolute bottom-0 left-0 mb-8" viewBox="0 0 375 283" fill="none" style="transform: scale(1.5); opacity: 0.1;">
+                        <rect x="159.52" y="175" width="152" height="152" rx="8" transform="rotate(-45 159.52 175)" fill="white" />
+                        <rect y="107.48" width="152" height="152" rx="8" transform="rotate(-45 0 107.48)" fill="white" />
+                    </svg>
+                    <i class="fas fa-check-circle text-white text-5xl"></i> <!-- Icon for Checked HW -->
+                    <div class="absolute bottom-4 text-white font-bold text-lg sm:text-xl md:text-2xl">Checked HW</div>
+                </div>
+            </a>
+
+            <!-- Attend Exam Card -->
+            <a href="{% url 'attend_exam' %}">
+                <div class="relative overflow-hidden bg-gradient-to-r from-blue-500 to-indigo-500 ml-2 lg:ml-0 rounded-lg shadow-lg w-44 h-44 lg:w-60 lg:h-60 flex items-center justify-center transform transition-transform duration-300 hover:scale-105">
+                    <svg class="absolute bottom-0 left-0 mb-8" viewBox="0 0 375 283" fill="none" style="transform: scale(1.5); opacity: 0.1;">
+                        <rect x="159.52" y="175" width="152" height="152" rx="8" transform="rotate(-45 159.52 175)" fill="white" />
+                        <rect y="107.48" width="152" height="152" rx="8" transform="rotate(-45 0 107.48)" fill="white" />
+                    </svg>
+                    <i class="fas fa-pencil-alt text-white text-5xl"></i> <!-- Icon for Attend Exam -->
+                    <div class="absolute bottom-4 text-white font-bold text-lg sm:text-xl md:text-2xl">Attend Exam</div>
+                </div>
+            </a>
+
+            <!-- Checked Scripts Card -->
+            <a href="{% url 'show_checked_script' %}">
+                <div class="relative overflow-hidden bg-gradient-to-r from-green-400 to-lime-500 ml-2 lg:ml-0 rounded-lg shadow-lg w-44 h-44 lg:w-60 lg:h-60 flex items-center justify-center transform transition-transform duration-300 hover:scale-105">
+                    <svg class="absolute bottom-0 left-0 mb-8" viewBox="0 0 375 283" fill="none" style="transform: scale(1.5); opacity: 0.1;">
+                        <rect x="159.52" y="175" width="152" height="152" rx="8" transform="rotate(-45 159.52 175)" fill="white" />
+                        <rect y="107.48" width="152" height="152" rx="8" transform="rotate(-45 0 107.48)" fill="white" />
+                    </svg>
+                    <i class="fas fa-file-alt text-white text-5xl"></i> <!-- Icon for Checked Scripts -->
+                    <div class="absolute bottom-4 text-white font-bold text-lg sm:text-xl md:text-2xl">Checked Scripts</div>
+                </div>
+            </a>
+
+            <!-- History Card -->
+            <a href="{% url 'show_history' %}">
+                <div class="relative overflow-hidden bg-gradient-to-r from-pink-500 to-red-400 ml-2 lg:ml-0 rounded-lg shadow-lg w-44 h-44 lg:w-60 lg:h-60 flex items-center justify-center transform transition-transform duration-300 hover:scale-105">
+                    <svg class="absolute bottom-0 left-0 mb-8" viewBox="0 0 375 283" fill="none" style="transform: scale(1.5); opacity: 0.1;">
+                        <rect x="159.52" y="175" width="152" height="152" rx="8" transform="rotate(-45 159.52 175)" fill="white" />
+                        <rect y="107.48" width="152" height="152" rx="8" transform="rotate(-45 0 107.48)" fill="white" />
+                    </svg>
+                    <i class="fas fa-history text-white text-5xl"></i> <!-- Icon for History -->
+                    <div class="absolute bottom-4 text-white font-bold text-lg sm:text-xl md:text-2xl">History</div>
+                </div>
+            </a>
+
+            <a href="{% url 'all_tools' %}">
+                <div class="relative overflow-hidden bg-gradient-to-r from-pink-400 to-purple-500  ml-2 lg:ml-0 rounded-lg shadow-lg w-44 h-44 lg:w-60 lg:h-60 flex items-center justify-center transform transition-transform duration-300 hover:scale-105">
+                    <svg class="absolute bottom-0 left-0 mb-8" viewBox="0 0 375 283" fill="none" style="transform: scale(1.5); opacity: 0.1;">
+                        <rect x="159.52" y="175" width="152" height="152" rx="8" transform="rotate(-45 159.52 175)" fill="white" />
+                        <rect y="107.48" width="152" height="152" rx="8" transform="rotate(-45 0 107.48)" fill="white" />
+                    </svg>
+                    <i class="fas fa-tools text-white text-5xl"></i> <!-- Icon for Tools -->
+                    <div class="absolute bottom-4 text-white font-bold text-lg sm:text-xl md:text-2xl flex items-center justify-center">Some Tools</div>
+                </div>
+            </a>
+            
+        </div>
+    </div>
+    <br>
+</div>
+
+{% elif user.is_authenticated and logged_in_user.role == 'admin' %}
+<div class="min-h-screen mt-20">
+    <div class="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center items-center gap-10">
+        <!-- Card Row -->
+        <div class="flex flex-wrap justify-center mt-16 sm:px-6 md:px-8 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-10 lg:gap-20"> 
+            <!-- Add Notes Card -->
+            <a href="{% url 'show_all_students' %}">
+                <div class="relative overflow-hidden bg-gradient-to-r from-red-400 to-pink-500 mr-2 rounded-lg shadow-lg w-44 h-44 lg:w-60 lg:h-60 flex flex-col items-center justify-center transform transition-transform duration-300 hover:scale-105">
+                    <svg class="absolute bottom-0 left-0 mb-8" viewBox="0 0 375 283" fill="none" style="transform: scale(1.5); opacity: 0.1;">
+                        <rect x="159.52" y="175" width="152" height="152" rx="8" transform="rotate(-45 159.52 175)" fill="white" />
+                        <rect y="107.48" width="152" height="152" rx="8" transform="rotate(-45 0 107.48)" fill="white" />
+                    </svg>
+                    <div class="relative text-white font-bold text-2xl mb-2">
+                        <i class="fas fa-sticky-note"></i> <!-- Font Awesome Icon -->
+                    </div>
+                    <div class="relative text-white font-bold text-xl text-center">Add Notes</div>
+                </div>
+            </a>
+
+            <!-- View Unchecked Homework Card -->
+            <a href="{% url 'get_all_students_hw' %}">
+                <div class="relative overflow-hidden bg-gradient-to-r from-teal-400 to-cyan-500 ml-2 rounded-lg shadow-lg w-44 h-44 lg:w-60 lg:h-60 flex flex-col items-center justify-center transform transition-transform duration-300 hover:scale-105">
+                    <svg class="absolute bottom-0 left-0 mb-8" viewBox="0 0 375 283" fill="none" style="transform: scale(1.5); opacity: 0.1;">
+                        <rect x="159.52" y="175" width="152" height="152" rx="8" transform="rotate(-45 159.52 175)" fill="white" />
+                        <rect y="107.48" width="152" height="152" rx="8" transform="rotate(-45 0 107.48)" fill="white" />
+                    </svg>
+                    <div class="relative text-white font-bold text-2xl mb-2">
+                        <i class="fas fa-book-open"></i> <!-- Font Awesome Icon -->
+                    </div>
+                    <div class="relative text-white font-bold text-xl text-center">View Unchecked Hw</div>
+                </div>
+            </a>
+
+            <!-- Take Exam Card -->
+            <a href="{% url 'take_exam' %}">
+                <div class="relative overflow-hidden bg-gradient-to-r from-purple-500 to-indigo-600 ml-2 rounded-lg shadow-lg w-44 h-44 lg:w-60 lg:h-60 flex flex-col items-center justify-center transform transition-transform duration-300 hover:scale-105">
+                    <svg class="absolute bottom-0 left-0 mb-8" viewBox="0 0 375 283" fill="none" style="transform: scale(1.5); opacity: 0.1;">
+                        <rect x="159.52" y="175" width="152" height="152" rx="8" transform="rotate(-45 159.52 175)" fill="white" />
+                        <rect y="107.48" width="152" height="152" rx="8" transform="rotate(-45 0 107.48)" fill="white" />
+                    </svg>
+                    <div class="relative text-white font-bold text-2xl mb-2">
+                        <i class="fas fa-pencil-alt"></i> <!-- Font Awesome Icon -->
+                    </div>
+                    <div class="relative text-white font-bold text-xl text-center">Take Exam</div>
+                </div>
+            </a>
+
+            <!-- View Unchecked Scripts Card -->
+            <a href="{% url 'get_all_students' %}">
+                <div class="relative overflow-hidden bg-gradient-to-r from-red-400 to-amber-500 ml-2 rounded-lg shadow-lg w-44 h-44 lg:w-60 lg:h-60 flex flex-col items-center justify-center transform transition-transform duration-300 hover:scale-105">
+                    <svg class="absolute bottom-0 left-0 mb-8" viewBox="0 0 375 283" fill="none" style="transform: scale(1.5); opacity: 0.1;">
+                        <rect x="159.52" y="175" width="152" height="152" rx="8" transform="rotate(-45 159.52 175)" fill="white" />
+                        <rect y="107.48" width="152" height="152" rx="8" transform="rotate(-45 0 107.48)" fill="white" />
+                    </svg>
+                    <div class="relative text-white font-bold text-2xl mb-2">
+                        <i class="fas fa-file-alt"></i> <!-- Font Awesome Icon -->
+                    </div>
+                    <div class="relative text-white font-bold text-xl text-center">View Unchecked Scripts</div>
+                </div>
+            </a>
+
+            <!-- View Exam List Card -->
+            <a href="{% url 'exam_list' %}">
+                <div class="relative overflow-hidden bg-gradient-to-r from-blue-500 to-indigo-500 ml-2 rounded-lg shadow-lg w-44 h-44 lg:w-60 lg:h-60 flex flex-col items-center justify-center transform transition-transform duration-300 hover:scale-105">
+                    <svg class="absolute bottom-0 left-0 mb-8" viewBox="0 0 375 283" fill="none" style="transform: scale(1.5); opacity: 0.1;">
+                        <rect x="159.52" y="175" width="152" height="152" rx="8" transform="rotate(-45 159.52 175)" fill="white" />
+                        <rect y="107.48" width="152" height="152" rx="8" transform="rotate(-45 0 107.48)" fill="white" />
+                    </svg>
+                    <div class="relative text-white font-bold text-2xl mb-2">
+                        <i class="fas fa-list-alt"></i> <!-- Font Awesome Icon -->
+                    </div>
+                    <div class="relative text-white font-bold text-xl text-center">View Exam List</div>
+                </div>
+            </a>
+
+            <!-- History Card -->
+            <a href="{% url 'get_all_students_history' %}">
+                <div class="relative overflow-hidden bg-gradient-to-r from-pink-400 to-purple-500 ml-2 rounded-lg shadow-lg w-44 h-44 lg:w-60 lg:h-60 flex flex-col items-center justify-center transform transition-transform duration-300 hover:scale-105">
+                    <svg class="absolute bottom-0 left-0 mb-8" viewBox="0 0 375 283" fill="none" style="transform: scale(1.5); opacity: 0.1;">
+                        <rect x="159.52" y="175" width="152" height="152" rx="8" transform="rotate(-45 159.52 175)" fill="white" />
+                        <rect y="107.48" width="152" height="152" rx="8" transform="rotate(-45 0 107.48)" fill="white" />
+                    </svg>
+                    <div class="relative text-white font-bold text-2xl mb-2">
+                        <i class="fas fa-history"></i> <!-- Font Awesome Icon -->
+                    </div>
+                    <div class="relative text-white font-bold text-xl text-center">History</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+{%endif%}

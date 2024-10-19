@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}Conversion{% endblock %}
+
+{% block content %}
+<div class="bg-gray-100 flex flex-col items-center justify-center min-h-screen">
+
+    <div class="bg-white shadow-md rounded-lg p-6 w-full max-w-md">
+        <h1 class="text-2xl font-bold text-center mb-4">Base Converter</h1>
+
+        <!-- From Base Selection -->
+        <label for="fromBase" class="block mb-2">From:</label>
+        <select id="fromBase" class="block w-full p-2 border rounded mb-4" onchange="showOtherInput('fromOtherBaseInput', this)">
+            <option value="">Select</option>
+            <option value="2">Binary</option>
+            <option value="10">Decimal</option>
+            <option value="8">Octal</option>
+            <option value="16">Hexadecimal</option>
+            <option value="other">Others</option>
+        </select>
+        <input type="number" id="fromOtherBaseInput" placeholder="Enter base (2-16)" min="2" max="16" class="block w-full p-2 border rounded mb-4" style="display:none;">
+
+        <!-- To Base Selection -->
+        <label for="toBase" class="block mb-2">To:</label>
+        <select id="toBase" class="block w-full p-2 border rounded mb-4" onchange="showOtherInput('toOtherBaseInput', this)">
+            <option value="">Select</option>
+            <option value="2">Binary</option>
+            <option value="10">Decimal</option>
+            <option value="8">Octal</option>
+            <option value="16">Hexadecimal</option>
+            <option value="other">Others</option>
+        </select>
+        <input type="number" id="toOtherBaseInput" placeholder="Enter base (2-16)" min="2" max="16" class="block w-full p-2 border rounded mb-4" style="display:none;">
+
+        <!-- Input Box for the Number -->
+        <label for="userInput" class="block mb-2">Input number:</label>
+        <input type="text" id="userInput" placeholder="Enter number" class="block w-full p-2 border rounded mb-4">
+
+        <!-- Convert Button -->
+        <button onclick="convert()" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition">Convert</button>
+
+        <!-- Result Box -->
+        <div id="resultBox" class="mt-4 text-center font-bold"></div>
+    </div>
+
+    <script>
+        // Show the "Other" input box when "Others" is selected
+        function showOtherInput(inputId, selectBox) {
+            const otherInput = document.getElementById(inputId);
+            if (selectBox.value === 'other') {
+                otherInput.style.display = 'block';
+            } else {
+                otherInput.style.display = 'none';
+            }
+        }
+
+        function validateInput(userInput, base) {
+            // Check if the base is "other" and get the actual base value from the input
+            if (base === 'other') {
+                const otherBase = parseInt(document.getElementById('fromOtherBaseInput').value);
+                console.log(otherBase)
+                if (otherBase < 2 || otherBase > 16) {
+                    return false; // Invalid base range for "other"
+                }
+                
+                
+                // Generate regex pattern based on the base
+                const validChars = [];
+                for (let i = 0; i < otherBase; i++) {
+                    if (i < 10) {
+                        validChars.push(i);
+                    } else {
+                        validChars.push(String.fromCharCode('A'.charCodeAt(0) + (i - 10)));
+                    }
+                }
+                const validCharsPattern = validChars.join('');
+                
+                const customRegex = new RegExp(`^[${validCharsPattern}]+(?:\\.[${validCharsPattern}]+)?$`, 'i');
+                
+                return customRegex.test(userInput);
+            }
+
+            // Use regex for the standard bases
+            const regex = base === '16' ? /^[0-9A-F.]+$/ :
+                        base === '10' ? /^[0-9.]+$/ :
+                        base === '8' ? /^[0-7.]+$/ :
+                        /^[0-1.]+$/; // Binary base
+            console.log(regex)
+            return regex.test(userInput);
+        }
+
+
+        // Convert the number based on the selected bases
+        function convert() {
+            const fromBaseSelect = document.getElementById('fromBase');
+            const toBaseSelect = document.getElementById('toBase');
+            const userInput = document.getElementById('userInput').value;
+
+            let fromBase = fromBaseSelect.value === 'other' ? parseInt(document.getElementById('fromOtherBaseInput').value) : parseInt(fromBaseSelect.value);
+            let toBase = toBaseSelect.value === 'other' ? parseInt(document.getElementById('toOtherBaseInput').value) : parseInt(toBaseSelect.value);
+
+            if (isNaN(fromBase) || isNaN(toBase)) {
+                alert("Please enter valid bases!");
+                return;
+            }
+
+            if (fromBaseSelect.value === 'other' && (fromBase < 2 || fromBase > 16)) {
+                alert("Base must be between 2 and 16!");
+                return;
+            }
+            if (toBaseSelect.value === 'other' && (toBase < 2 || toBase > 16)) {
+                alert("Base must be between 2 and 16!");
+                return;
+            }
+
+            // Validate user input based on the from base
+            const isValidInput = validateInput(userInput, fromBaseSelect.value);
+            console.log(fromBaseSelect.value)
+            
+            if (!isValidInput) {
+                alert("Invalid number for the selected base!");
+                return;
+            }
+
+            const result = AnyToAny(userInput, fromBase, toBase);
+            document.getElementById('resultBox').innerHTML = "Converted Result: " + result;
+        }
+
+
+        // JavaScript code converted from Java
+        function DecimalToAny(userInput, base) {
+            let total = '';
+            let [integer, fraction] = userInput.split('.');
+
+            let numInteger = parseInt(integer);
+            let intPart = '';
+
+            while (numInteger !== 0) {
+                const quotient = Math.floor(numInteger / base);
+                const remainder = numInteger % base;
+
+                let remainderChar;
+                if (remainder >= 10 && remainder <= 15) {
+                    remainderChar = String.fromCharCode('A'.charCodeAt(0) + (remainder - 10));
+                } else {
+                    remainderChar = remainder.toString();
+                }
+
+                intPart = remainderChar + intPart;
+                numInteger = quotient;
+            }
+
+            let fracPart = '';
+            let numFraction = parseFloat('0.' + (fraction || '0'));
+            const list = [];
+            let i = 0;
+
+            while (numFraction !== 0 && i < 11) {
+                const result = numFraction * base;
+                const [integerPart, fractionalPart] = result.toString().split('.');
+
+                let integerChar;
+                const intVal = parseInt(integerPart);
+                if (intVal >= 10 && intVal <= 15) {
+                    integerChar = String.fromCharCode('A'.charCodeAt(0) + (intVal - 10));
+                } else {
+                    integerChar = intVal.toString();
+                }
+
+                fracPart += integerChar;
+                numFraction = parseFloat('0.' + (fractionalPart || '0'));
+
+                if (list.includes(numFraction)) {
+                    fracPart += '.....';
+                    break;
+                }
+
+                list.push(numFraction);
+                i++;
+            }
+
+            return (intPart || '0') + (fracPart ? '.' + fracPart : '');
+        }
+
+        function AnyToDecimal(userInput, base) {
+            let [integer, fraction] = userInput.split('.');
+            let intTotal = 0;
+
+            for (let i = 0; i < integer.length; i++) {
+                const digit = integer[i];
+                let digitValue = digit >= 'A' && digit <= 'F' ? digit.charCodeAt(0) - 'A'.charCodeAt(0) + 10 : parseInt(digit);
+                intTotal = intTotal * base + digitValue;
+            }
+
+            let fracTotal = 0;
+            if (fraction) {
+                for (let i = 0; i < fraction.length; i++) {
+                    const digit = fraction[i];
+                    let digitValue = digit >= 'A' && digit <= 'F' ? digit.charCodeAt(0) - 'A'.charCodeAt(0) + 10 : parseInt(digit);
+                    fracTotal += digitValue / Math.pow(base, i + 1);
+                }
+            }
+
+            return (intTotal + fracTotal).toString();
+        }
+
+        function AnyToAny(userInput, base1, base2) {
+            const decimalValue = AnyToDecimal(userInput, base1);
+            return DecimalToAny(decimalValue, base2);
+        }
+    </script>
+</div>
+{% endblock %}

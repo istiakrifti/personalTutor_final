@@ -1,0 +1,72 @@
+{% load static tailwind_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Project{% endblock %}</title>
+    {% comment %} Adding tailwind cdn for temporary use {% endcomment %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@100..900&family=Noto+Serif+Bengali:wght@100..900&family=Tiro+Bangla:ital@0;1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    
+    <style>
+        .noto-sans-bengali {
+            font-family: "Noto Sans Bengali", sans-serif;
+            font-optical-sizing: auto;
+            font-style: normal;
+            font-weight: normal;
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+            transform: rotate(0deg);
+            }
+            100% {
+            transform: rotate(360deg);
+            }
+        }
+    </style>
+    {% tailwind_css %}
+</head>
+<body class="noto-sans-bengali">
+
+    <div id="loading" class="fixed inset-0 flex items-center justify-center bg-white z-50 hidden">
+        <div class="loader w-16 h-16 rounded-full border-8 border-gray-200 border-t-6 border-t-blue-500 animate-spin"></div>
+    </div>
+
+    {% include 'nav.html' %}
+
+    <div class="content">
+        {% block content %}
+            
+        {% endblock %}
+    </div>
+
+    {% include 'footer.html' %}
+    <script>
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show the loader when the page is loading
+            document.getElementById('loading').classList.remove('hidden');
+
+            // Hide the loader when the page has fully loaded
+            window.onload = function() {
+                document.getElementById('loading').classList.add('hidden');
+            };
+        });
+    </script>
+</body>
+</html>

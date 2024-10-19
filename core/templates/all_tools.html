@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Registration{% endblock %}
+
+{% block content %}
+    <div class="min-h-screen bg-gradient-to-r from-green-100 to-blue-200 mt-20 relative overflow-hidden">
+        <!-- Background Image -->
+        <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('path/to/your/image.jpg');"></div>
+
+        <div class="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center items-center gap-10 relative z-10">
+            <!-- Card Row -->
+            <div class="flex flex-wrap justify-center mt-16 sm:px-6 md:px-8 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-10 lg:gap-20"> <!-- Centered row of cards -->
+                <a href="{% url 'base_converter' %}">
+                    <div class="relative overflow-hidden bg-teal-500 mr-2 rounded-lg shadow-lg w-44 h-44 lg:w-60 lg:h-60 flex flex-col items-center justify-center transform transition-transform duration-300 hover:scale-105"> <!-- Square card -->
+                        <div class="mb-2 text-white text-4xl">
+                            <i class="fas fa-exchange-alt"></i> <!-- Icon for Number System Conversion -->
+                        </div>
+                        <svg class="absolute bottom-0 left-0 mb-8" viewBox="0 0 375 283" fill="none" style="transform: scale(1.5); opacity: 0.1;">
+                            <rect x="159.52" y="175" width="152" height="152" rx="8" transform="rotate(-45 159.52 175)" fill="white" />
+                            <rect y="107.48" width="152" height="152" rx="8" transform="rotate(-45 0 107.48)" fill="white" />
+                        </svg>
+                        <div class="relative text-white font-bold text-2xl px-4  mt-0 text-center">Number System Conversion</div>
+                    </div>
+                </a>
+
+                <a href="{% url 'expression_to_circuit' %}">
+                    <div class="relative overflow-hidden bg-orange-500 ml-2 rounded-lg shadow-lg w-44 h-44 lg:w-60 lg:h-60 flex flex-col items-center justify-center transform transition-transform duration-300 hover:scale-105"> <!-- Square card -->
+                        <div class="mb-2 text-white text-4xl">
+                            <i class="fas fa-project-diagram"></i> <!-- Icon for Expression To Circuit -->
+                        </div>
+                        <svg class="absolute bottom-0 left-0 mb-8" viewBox="0 0 375 283" fill="none" style="transform: scale(1.5); opacity: 0.1;">
+                            <rect x="159.52" y="175" width="152" height="152" rx="8" transform="rotate(-45 159.52 175)" fill="white" />
+                            <rect y="107.48" width="152" height="152" rx="8" transform="rotate(-45 0 107.48)" fill="white" />
+                        </svg>
+                        <div class="relative text-white font-bold text-2xl px-4 mt-0 text-center">Expression To Circuit</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include Font Awesome for Icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+{% endblock %}

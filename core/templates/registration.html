@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}Registration{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-r from-blue-500 to-purple-600">
+    <div class="bg-white shadow-lg border border-gray-300 mt-16 sm:w-[500px] w-full rounded-lg transition-all duration-300 ml-1 mr-1">
+        <form method="post" action="." class="w-full  mx-auto p-8 " enctype="multipart/form-data">
+            {% csrf_token %}
+            <h1 class="text-3xl md:text-3xl lg:text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-yellow-400 mb-8">
+                Registration Form
+            </h1>
+            
+            <div class="mb-4">
+                
+                <label class="block text-gray-700 font-bold  font-segoe " for="name">
+                    {{ form.name.label_tag }} <span class="text-red-700 font-bold">*</span>
+                </label>
+                <div class="relative flex items-center border border-indigo-400 rounded-lg shadow-lg hover:shadow-xl transition duration-200">
+                    <span class="absolute left-3 top-2.5 text-indigo-500">
+                        <i class="fas fa-user text-blue-500"></i>
+                    </span>
+                    {{ form.name}}
+                </div>
+                {% for error in form.name.errors %}
+                    <div class="text-red-700 text-sm">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-bold  font-segoe " for="mobile_no">
+                    {{ form.mobile_no.label_tag }}  <span class="text-red-700 font-bold">*</span>
+                </label>
+                <div class="relative flex items-center border border-indigo-400 rounded-lg shadow-lg hover:shadow-xl transition duration-200">
+                    <span class="absolute left-3 top-2.5 text-indigo-500">
+                        <i class="fas fa-mobile-alt text-blue-500"></i>
+                    </span>
+                    {{ form.mobile_no}}
+                </div>
+                {% for error in form.mobile_no.errors %}
+                    <div class="text-red-700 text-sm">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-bold  font-segoe " for="email">
+                    {{ form.email.label_tag }} <span class="text-red-700 font-bold">*</span>
+                </label>
+                <div class="relative flex items-center border border-indigo-400 rounded-lg shadow-lg hover:shadow-xl transition duration-200">
+                    <span class="absolute left-3 top-2.5 text-indigo-500">
+                        <i class="fas fa-envelope text-blue-500"></i>
+                    </span>
+                    {{ form.email}}
+                </div>
+                {% for error in form.email.errors %}
+                    <div class="text-red-700 text-sm">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-bold  font-segoe " for="password">
+                    {{ form.password.label_tag }} <span class="text-red-700 font-bold">*</span>
+                </label>
+                <div class="relative flex items-center border border-indigo-400 rounded-lg shadow-lg hover:shadow-xl transition duration-200">
+                    <span class="absolute left-3 top-2.5 text-indigo-500">
+                        <i class="fas fa-lock text-blue-500"></i>
+                    </span>
+                    {{ form.password }}
+                </div>
+                {% for error in form.password.errors %}
+                    <div class="text-red-700 text-sm">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-bold  font-segoe " for="confirm-password">
+                    {{ form.confirm_password.label_tag }}  <span class="text-red-700 font-bold">*</span>
+                </label>
+                <div class="relative flex items-center border border-indigo-400 rounded-lg shadow-lg hover:shadow-xl transition duration-200">
+                    <span class="absolute left-3 top-2.5 text-indigo-500">
+                        <i class="fas fa-lock text-blue-500"></i>
+                    </span>
+                    {{ form.confirm_password }}
+                </div>
+                {% for error in form.confirm_password.errors %}
+                    <div class="text-red-700 text-sm">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="confirm-password">Picture</label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                    <div class="space-y-1 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div class="flex text-sm text-gray-600 justify-center">
+                            <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 underline hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                <span>Upload image</span>
+                                <input id="file-upload" name="file-upload" type="file" class="sr-only">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div id="file-preview-container" class="mt-4 space-y-4"></div>
+            <div id="error"></div>
+
+            <button class="w-full bg-indigo-500 text-white text-sm font-bold py-2 px-4 rounded-md hover:bg-indigo-600 transition duration-300" type="submit">Register</button>
+
+            <div class="mt-4 text-center">
+                <p class="text-sm">Already have an account? <a href="{% url 'login' %}" class="text-blue-600 hover:underline">Login</a></p>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    let fileDetails = [];
+
+    const fileInput = document.getElementById('file-upload');
+    const filePreviewContainer = document.getElementById('file-preview-container');
+
+    // Allowed file types
+    const allowedFileTypes = ['image/jpeg', 'image/png'];
+
+    fileInput.addEventListener('change', function () {
+        const file = this.files[0]; // Only accept the first file
+
+        // Validate file type
+        if (file && !allowedFileTypes.includes(file.type)) {
+            alert(`Invalid file type: ${file.name}`);
+            this.value = ''; // Reset the input
+            return;
+        }
+
+        // Clear previous preview
+        filePreviewContainer.innerHTML = '';
+
+        // Create preview for the file
+        const filePreview = document.createElement('div');
+        filePreview.classList.add('border', 'p-4', 'rounded', 'relative', 'max-w-screen-md', 'mx-auto');
+
+        const fileName = document.createElement('p');
+        fileName.textContent = `File: ${file.name}`;
+        fileName.classList.add('mt-1', 'font-bold', 'truncate');
+
+        // Create image preview
+        const imagePreview = document.createElement('img');
+        imagePreview.src = URL.createObjectURL(file);
+        imagePreview.classList.add('h-20', 'w-20', 'object-cover', 'rounded-md');
+        filePreview.appendChild(imagePreview);
+
+        // Append elements
+        filePreview.appendChild(fileName);
+        filePreviewContainer.appendChild(filePreview);
+
+        fileDetails = [{ file }]; // Store only one file detail
+    });
+        
+    
+
+    function displayFormErrors(errors) {
+        const errorContainer = document.getElementById('error');
+        errorContainer.innerHTML = ''
+        console.log(errors)
+        Object.keys(errors).forEach((field) => {
+            const fieldErrors = errors[field].join(', ');
+            const errorItem = document.createElement('div');
+            errorItem.classList.add('mb-4', 'px-3', 'py-2', 'bg-red-100', 'rounded-xl');
+            errorItem.textContent = fieldErrors;
+            errorContainer.appendChild(errorItem);
+        });
+    }
+
+    document.querySelector('form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const formData = new FormData(this);
+        fileDetails.forEach(detail => {
+            formData.append('files[]', detail.file);
+        });
+
+        fetch(this.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success' && data.redirect) {
+                const redirectUrl = `${data.redirect}`;
+                // console.log(redirectUrl)
+                // alert('Verification email sent! Please check your inbox to verify your email address.')
+                window.location.href = redirectUrl;
+            } else if (data.status === 'error' && data.errors) {
+                displayFormErrors(data.errors);
+            } else {
+                console.error('Submission error:', data);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+
+</script>
+
+{% endblock %}

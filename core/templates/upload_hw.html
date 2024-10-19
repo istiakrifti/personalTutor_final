@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}Upload HW{% endblock %}
+
+{% block content %}
+<div class="min-h-screen p-6 bg-gradient-to-r from-green-100 to-blue-200">
+    <div class="mt-4">
+        <div class="text-blue-950 text-center">
+            <h1 class="text-3xl font-bold mt-16">UPLOAD HW</h1>
+        </div>
+        <form method="post" action="." class="bg-white shadow-md rounded-lg p-8 mt-8 space-y-6" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div id="error"></div>
+
+            <div>
+                <label for="title" class="block text-sm font-medium text-gray-700">HW Title<span class="text-red-700 font-bold">*</span></label>
+                {{ form.title}}
+                <div id="title-status" class="mt-2"></div> 
+            </div>
+
+            <div>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md bg-gray-50">
+                    <div class="space-y-1 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div class="flex text-sm text-gray-600 justify-center">
+                            <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 underline hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                <span>Upload Files</span>
+                                <input id="file-upload" name="file-upload" type="file" class="sr-only" multiple required>
+                            </label>
+                        </div>
+                        <p class="text-xs text-gray-800">Valid Formats of Files: <span class="font-semibold">pdf, image</span></p>
+                    </div>
+                </div>
+                <div id="file-preview-container" class="mt-4 space-y-4"></div>
+            </div>
+
+            <div class="flex justify-center pt-4">
+                <button type="submit" class="w-full px-4 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let fileDetails = [];
+
+    const fileInput = document.getElementById('file-upload');
+    const filePreviewContainer = document.getElementById('file-preview-container');
+    const titleInput = document.getElementById('title')
+    const titleStatus = document.getElementById('title-status')
+
+    // Allowed file types and max file size (10MB)
+    const allowedFileTypes = [
+        'image/jpeg', 
+        'image/jpg', 
+        'image/png', 
+        'application/pdf', 
+    ];
+
+    fileInput.addEventListener('change', function () {
+        
+        const files = Array.from(this.files);
+        files.forEach(file => {
+        // Validate file type and size
+        if (!allowedFileTypes.includes(file.type)) {
+            alert(`Invalid file type: ${file.name}`);
+            return;
+        }
+
+        // Create preview for the file
+        const filePreview = document.createElement('div');
+        filePreview.classList.add('border', 'p-4', 'rounded', 'relative', 'max-w-screen-md', 'mx-auto');
+        
+        const fileName = document.createElement('p');
+        fileName.textContent = `File: ${file.name}`;
+        fileName.classList.add('mt-1', 'font-bold', 'truncate');
+        
+        // File type-based preview (image preview or PDF icon)
+        const filePreviewElement = document.createElement('div');
+        filePreviewElement.classList.add('mt-2', 'mb-2');
+
+        if (file.type.startsWith('image/')) {
+            const imagePreview = document.createElement('img');
+            imagePreview.src = URL.createObjectURL(file);
+            imagePreview.classList.add('h-20', 'w-20', 'object-cover', 'rounded-md');
+            filePreviewElement.appendChild(imagePreview);
+        } else {
+
+            const pdfIcon = document.createElement('span');
+            pdfIcon.textContent = 'PDF File';
+            pdfIcon.classList.add('text-sm', 'bg-gray-200', 'rounded-md', 'px-2', 'py-1');
+            filePreviewElement.appendChild(pdfIcon);
+        }
+        
+        // Remove button (replacing with SVG)
+        const removeButton = document.createElement('button');
+        removeButton.classList.add('absolute', 'top-0', 'right-0', 'text-red-500', 'font-bold', 'hover:underline');
+
+        // Create SVG element
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('stroke-width', '1.5');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.classList.add('size-6');
+
+        // Create path element
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('stroke-linejoin', 'round');
+        path.setAttribute('d', 'm14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0');
+
+        // Append path to SVG
+        svg.appendChild(path);
+
+        // Append SVG to button
+        removeButton.appendChild(svg);
+
+        // Add event listener for removing the preview
+        removeButton.addEventListener('click', () => {
+            const index = fileDetails.findIndex(detail => detail.file.name === file.name);
+            if (index > -1) {
+                // Remove from fileDetails array
+                fileDetails.splice(index, 1);
+            }
+            filePreviewContainer.removeChild(filePreview);
+        });
+
+        // Append the button to your container
+        filePreviewContainer.appendChild(removeButton);
+
+        // Append elements
+        filePreview.appendChild(fileName);
+        filePreview.appendChild(filePreviewElement);
+        filePreview.appendChild(removeButton);
+        filePreviewContainer.appendChild(filePreview);
+
+        fileDetails.push({
+            file: file,
+        });
+
+        });
+        
+    });
+
+    function displayFormErrors(errors) {
+        const errorContainer = document.getElementById('error');
+        errorContainer.innerHTML = ''
+        console.log(errors)
+        Object.keys(errors).forEach((field) => {
+            const fieldErrors = errors[field].join(', ');
+            const errorItem = document.createElement('div');
+            errorItem.classList.add('mb-4', 'px-3', 'py-2', 'bg-red-100', 'rounded-xl');
+            errorItem.textContent = fieldErrors;
+            errorContainer.appendChild(errorItem);
+        });
+    }
+
+    document.querySelector('form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const formData = new FormData(this);
+        fileDetails.forEach(detail => {
+            formData.append('files[]', detail.file);
+        });
+
+        fetch(this.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success' && data.redirect) {
+                const redirectUrl = `${data.redirect}`;
+                window.location.href = redirectUrl;
+            } else if (data.status === 'error' && data.errors) {
+                displayFormErrors(data.errors);
+            } else {
+                console.error('Submission error:', data);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+
+
+    titleInput.addEventListener('input', function () {
+        const title = this.value;
+        console.log(title)
+        
+        if (title) {
+            fetch(`/check-title/?title=${title}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.is_taken) {
+                        titleStatus.textContent = 'This title is already taken.';
+                        titleStatus.style.color = 'red';
+                    } else {
+                        titleStatus.textContent = 'This title is available.';
+                        titleStatus.style.color = 'green';
+                    }
+                });
+        } else {
+            titleStatus.textContent = '';
+        }
+    });
+</script>
+{% endblock %}

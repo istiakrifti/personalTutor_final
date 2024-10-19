@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Live Class{% endblock %}
+
+{% block content %}
+<div class="bg-gradient-to-r from-green-100 to-blue-200 flex min-h-screen items-center justify-center">
+    <div class="relative flex w-full max-w-lg flex-col rounded-lg bg-white shadow-xl overflow-hidden mx-4 md:mx-0">
+        <!-- Image Section -->
+        <div class="relative">
+            <img src="https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                alt="Live Class Image" class="w-full h-48 object-cover" />
+        </div>
+
+        <!-- Class Info Section -->
+        <div class="p-6">
+            <h6 class="mb-4 text-3xl font-semibold text-pink-600 flex items-center">
+                <i class="fas fa-video mr-2" aria-hidden="true"></i>
+                <span>Live Class</span>
+            </h6>
+            <p class="mb-8 text-gray-700">
+                Join the live class using any online streaming platform such as Zoom, Google Meet, or Telegram.
+            </p>
+
+            <!-- Button Section -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Zoom Button -->
+                <a href="https://zoom.us/" target="_blank" 
+                    class="flex items-center justify-center bg-blue-500 text-white py-3 rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
+                    <i class="fas fa-video mr-2"></i> Zoom
+                </a>
+                <!-- Google Meet Button -->
+                <a href="https://meet.google.com/" target="_blank" 
+                    class="flex items-center justify-center bg-red-500 text-white py-3 rounded-lg shadow-md hover:bg-red-600 transition duration-300">
+                    <i class="fab fa-google mr-2"></i> Google Meet
+                </a>
+                <!-- Telegram Button -->
+                <a href="https://telegram.org/" target="_blank" 
+                    class="flex items-center justify-center bg-blue-600 text-white py-3 rounded-lg shadow-md hover:bg-blue-700 transition duration-300">
+                    <i class="fab fa-telegram mr-2"></i> Telegram
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+{% endblock %}

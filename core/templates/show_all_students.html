@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}All Students{% endblock %}
+
+{% block content %}
+<div class="min-h-screen p-6 bg-gradient-to-r from-blue-50 to-purple-50">
+    <div class="text-center mb-10">
+        <h1 class="text-5xl text-red-600 font-extrabold mt-16">All Students</h1>
+    </div>
+
+            <table class="min-w-full bg-white shadow-lg rounded-lg border border-gray-300">
+                <thead class="bg-gradient-to-r from-blue-400 to-purple-400 rounded-t-lg">
+                    <tr>
+                        <th class="py-4 px-6 text-left text-white font-semibold text-lg">Student Name</th>
+                        <th class="py-4 px-6 text-left text-white font-semibold text-lg">Mobile Number</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-300">
+                    {% for student in students %}
+                    <tr class="hover:bg-gradient-to-r from-purple-100 to-blue-100 transition duration-200 cursor-pointer">
+                        <td class="py-4 px-6 text-gray-800 text-lg">
+                            <a href="{% url 'add_files' student.id %}" class="flex justify-between items-center w-full h-full">
+                                {{ student.name }}
+                            </a>
+                        </td>
+                        <td class="py-4 px-6 text-gray-800 text-lg">
+                            <a href="{% url 'add_files' student.id %}" class="flex justify-between items-center w-full h-full">
+                                {{ student.mobile_no }}
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+</div>
+{% endblock %}
