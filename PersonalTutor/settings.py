@@ -29,10 +29,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-database_url = os.environ.get("DATABASE_URL")
-DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+# database_url = os.environ.get("DATABASE_URL")
+DEBUG = True
 
-ALLOWED_HOSTS = ['personaltutor15.onrender.com','localhost','127.0.0.1']
+ALLOWED_HOSTS = ['localhost','127.0.0.1']
 
 TAILWIND_APP_NAME = 'theme'
 INTERNAL_IPS = ["127.0.0.1"]
@@ -121,23 +121,23 @@ WSGI_APPLICATION = 'PersonalTutor.wsgi.application'
 #     }
 # }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'personaldb_4usd',
-#         'USER': 'personaldb_4usd_user',
-#         'PASSWORD': 'tcnyxxAvx3HlQUw7FxThyQeHj9LKBOwv',
-#         'HOST': 'dpg-csa09jbqf0us739oghg0-a.oregon-postgres.render.com',
-#         'PORT': '5432',
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'personaldb_4usd',
+        'USER': 'personaldb_4usd_user',
+        'PASSWORD': 'tcnyxxAvx3HlQUw7FxThyQeHj9LKBOwv',
+        'HOST': 'dpg-csa09jbqf0us739oghg0-a.oregon-postgres.render.com',
+        'PORT': '5432',
+    }
+}
 
 # DATABASES = {
 #     'defaults': dj_database_url.parse("postgresql://personaldb_4usd_user:tcnyxxAvx3HlQUw7FxThyQeHj9LKBOwv@dpg-csa09jbqf0us739oghg0-a.oregon-postgres.render.com/personaldb_4usd")
 # }
-DATABASES = {
-    'default': dj_database_url.parse(database_url)
-}
+# DATABASES = {
+#     'default': dj_database_url.parse(database_url)
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
