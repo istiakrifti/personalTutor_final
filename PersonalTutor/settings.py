@@ -32,9 +32,6 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 # database_url = 'postgresql://personaldb_4usd_user:tcnyxxAvx3HlQUw7FxThyQeHj9LKBOwv@dpg-csa09jbqf0us739oghg0-a/personaldb_4usd'
 database_url = os.environ.get("DATABASE_URL")
 DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
-
-ALLOWED_HOSTS = ['personal-tutor.onrender.com','localhost','127.0.0.1']
-
 ALLOWED_HOSTS = ['personaltutor15.onrender.com', 'localhost','127.0.0.1']
 
 TAILWIND_APP_NAME = 'theme'
