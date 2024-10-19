@@ -86,11 +86,11 @@ TEMPLATES = [
     },
 ]
 
-# CLOUDINARY_STORAGE = {
-#     'CLOUD_NAME': 'dtfby3mcr',
-#     'API_KEY': '445736365214642',
-#     'API_SECRET': 'rfWuOCl1g6L8lS4UEqQOLheWADU'
-# }
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dtfby3mcr',
+    'API_KEY': '445736365214642',
+    'API_SECRET': 'rfWuOCl1g6L8lS4UEqQOLheWADU'
+}
 cloudinary.config(
     cloud_name='dtfby3mcr',
     api_key='445736365214642',
