@@ -571,8 +571,9 @@ def registration_view(request):
             html_message = format_html(
                 '''
                 <div style="background-color:#f4f4f4; padding: 20px;">
+                    <h1>Personal Tutor</h1>
                     <div style="text-align: center; padding: 20px; background-color: #2b6cb0; color: #fff; border-radius: 10px;">
-                        <h1>Your Verification Code</h1>
+                        <h2>Your Verification Code</h2>
                         <p style="font-size: 24px; font-weight: bold; color: #ffdd57;">{}</p>
                     </div>
                     <p style="text-align: center; font-size: 16px;">
