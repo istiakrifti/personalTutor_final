@@ -25,12 +25,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-bha!52(bmki$m9!9jc=oc7+2r=9$cx9-u+v98e7+8n7o5v93d7'
-# SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+# SECRET_KEY = 'django-insecure-bha!52(bmki$m9!9jc=oc7+2r=9$cx9-u+v98e7+8n7o5v93d7'
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-database_url = 'postgresql://personaldb_4usd_user:tcnyxxAvx3HlQUw7FxThyQeHj9LKBOwv@dpg-csa09jbqf0us739oghg0-a/personaldb_4usd'
-DEBUG = False
+# database_url = 'postgresql://personaldb_4usd_user:tcnyxxAvx3HlQUw7FxThyQeHj9LKBOwv@dpg-csa09jbqf0us739oghg0-a/personaldb_4usd'
+database_url = os.environ.get("DATABASE_URL")
+DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+
+ALLOWED_HOSTS = ['personal-tutor.onrender.com','localhost','127.0.0.1']
 
 ALLOWED_HOSTS = ['personaltutor15.onrender.com', 'localhost','127.0.0.1']
 
@@ -86,11 +89,11 @@ TEMPLATES = [
     },
 ]
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dtfby3mcr',
-    'API_KEY': '445736365214642',
-    'API_SECRET': 'rfWuOCl1g6L8lS4UEqQOLheWADU'
-}
+# CLOUDINARY_STORAGE = {
+#     'CLOUD_NAME': 'dtfby3mcr',
+#     'API_KEY': '445736365214642',
+#     'API_SECRET': 'rfWuOCl1g6L8lS4UEqQOLheWADU'
+# }
 cloudinary.config(
     cloud_name='dtfby3mcr',
     api_key='445736365214642',
