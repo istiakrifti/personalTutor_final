@@ -22,6 +22,72 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
+                {% for file in unchecked_files %}
+                <tr class="hover:bg-gradient-to-r from-pink-50 to-yellow-50 transition duration-300">
+                    <td class="p-4 text-center text-gray-800">
+                        <p>{{ forloop.counter }}</p> <!-- Serial number -->
+                    </td>
+                    <td class="p-4">
+                        <div class="flex flex-col md:flex-row items-start md:items-center space-x-3">
+                            <p class="text-lg font-semibold text-pink-600">Question: {{ file.question.title }}</p>
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        <div class="flex flex-col md:flex-row justify-end space-y-2 md:space-y-0 md:space-x-3">
+                            <!-- Open Question Button -->
+                            <a href="{{ file.question.question.url }}" target="_blank" class="bg-blue-400 text-white font-bold py-2 px-4 rounded-lg shadow hover:bg-blue-500 transition duration-300 transform hover:scale-105">
+                                <i class="fas fa-folder-open mr-1"></i> Open
+                            </a>
+                            <a href="{{ file.downloadable_url }}" download="{{file.question.title}}.pdf" class="bg-green-400 text-white font-bold py-2 px-4 rounded-lg shadow hover:bg-green-500 transition duration-300 transform hover:scale-105">
+                                Download
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="hover:bg-gradient-to-r from-pink-50 to-yellow-50 transition duration-300">
+                    <td class="p-4 text-center"></td>
+                    <td class="p-4">
+                        <div class="flex flex-col md:flex-row items-start md:items-center space-x-3">
+                            <p class="text-lg font-semibold text-pink-600">Answer: {{ file.question.title }}_checked</p>
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        <div class="flex flex-col md:flex-row justify-end space-y-2 md:space-y-0 md:space-x-3">
+                            <!-- Open Answer Button -->
+                            <a href="{{ file.answer.url }}" target="_blank" class="bg-blue-400 text-white font-bold py-2 px-4 rounded-lg shadow hover:bg-blue-500 transition duration-300 transform hover:scale-105">
+                                <i class="fas fa-folder-open mr-1"></i> Open
+                            </a>
+                            <a href="{{ file.downloadable_url }}" download="{{file.question.title}}.pdf" class="bg-green-400 text-white font-bold py-2 px-4 rounded-lg shadow hover:bg-green-500 transition duration-300 transform hover:scale-105">
+                                Download
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="py-4 px-4 text-center text-gray-500">No checked files available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="text-center my-8 mt-16">
+        <h1 class="text-4xl font-extrabold text-blue-600 hover:text-blue-800 transition duration-300" style="font-family: 'Oswald', sans-serif;">
+            Unchecked Scripts
+        </h1>
+    </div>
+
+    <!-- Files Section -->
+    <div class="bg-white shadow-lg rounded-lg mx-auto max-w-5xl overflow-hidden">
+        <table class="min-w-full border-collapse">
+            <thead class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white">
+                <tr>
+                    <th class="p-4 text-left text-lg font-bold">S.No</th>
+                    <th class="p-4 text-left text-lg font-bold">Question & Answer</th>
+                    <th class="p-4 text-left text-lg font-bold"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
                 {% for file in checked_files %}
                 <tr class="hover:bg-gradient-to-r from-pink-50 to-yellow-50 transition duration-300">
                     <td class="p-4 text-center text-gray-800">
@@ -38,7 +104,7 @@
                             <a href="{{ file.question.question.url }}" target="_blank" class="bg-blue-400 text-white font-bold py-2 px-4 rounded-lg shadow hover:bg-blue-500 transition duration-300 transform hover:scale-105">
                                 <i class="fas fa-folder-open mr-1"></i> Open
                             </a>
-                            <a href="{{ file.downloadable_url }}" download class="bg-green-400 text-white font-bold py-2 px-4 rounded-lg shadow hover:bg-green-500 transition duration-300 transform hover:scale-105">
+                            <a href="{{ file.downloadable_url }}" download="{{file.question.title}}.pdf" class="bg-green-400 text-white font-bold py-2 px-4 rounded-lg shadow hover:bg-green-500 transition duration-300 transform hover:scale-105">
                                 Download
                             </a>
                         </div>
@@ -57,7 +123,7 @@
                             <a href="{{ file.answer.url }}" target="_blank" class="bg-blue-400 text-white font-bold py-2 px-4 rounded-lg shadow hover:bg-blue-500 transition duration-300 transform hover:scale-105">
                                 <i class="fas fa-folder-open mr-1"></i> Open
                             </a>
-                            <a href="{{ file.downloadable_url }}" download class="bg-green-400 text-white font-bold py-2 px-4 rounded-lg shadow hover:bg-green-500 transition duration-300 transform hover:scale-105">
+                            <a href="{{ file.downloadable_url }}" download="{{file.question.title}}.pdf" class="bg-green-400 text-white font-bold py-2 px-4 rounded-lg shadow hover:bg-green-500 transition duration-300 transform hover:scale-105">
                                 Download
                             </a>
                         </div>

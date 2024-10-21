@@ -627,7 +627,7 @@
             // Check for invalid sequences
             if (currentChar === '+' || currentChar === "'") {
                 // Prevent consecutive operators
-                if (prevChar === '+' || prevChar === "'") {
+                if (prevChar === '+') {
                     return false; // Consecutive operators
                 }
             } else if (currentChar === ')') {

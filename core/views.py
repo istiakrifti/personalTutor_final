@@ -211,13 +211,15 @@ def show_unchecked_scripts_view(request, user_id):
 @user_required
 def show_checked_hw_view(request):
     checked_files = HWFiles.objects.filter(status='checked', student=request.user)
-    return render(request, 'show_checked_files.html', {'checked_files': checked_files})
+    unchecked_files = HWFiles.objects.filter(status='unchecked', student=request.user)
+    return render(request, 'show_checked_files.html', {'checked_files': checked_files, 'unchecked_files':unchecked_files})
 
 @login_required
 @user_required
 def show_checked_scripts_view(request):
     checked_files = AnswerScript.objects.filter(status='checked', question__student=request.user)
-    return render(request, 'show_checked_script.html', {'checked_files': checked_files})
+    unchecked_files = AnswerScript.objects.filter(status='unchecked', question__student=request.user)
+    return render(request, 'show_checked_script.html', {'checked_files': checked_files, 'unchecked_files':unchecked_files})
 
 @login_required
 @admin_required

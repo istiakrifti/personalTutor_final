@@ -38,7 +38,7 @@
                         <div class="flex text-sm text-gray-600 justify-center">
                             <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 underline hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
                                 <span>Upload Files</span>
-                                <input id="file-upload" name="file-upload" type="file" class="sr-only" multiple>
+                                <input id="file-upload" name="file-upload" type="file" class="sr-only" multiple required>
                             </label>
                         </div>
                         <p class="text-xs text-gray-800 text-center">Valid Formats of Files <span class="font-semibold">pdf, image</span></p>
@@ -136,6 +136,11 @@
 
         // Add event listener for removing the preview
         removeButton.addEventListener('click', () => {
+            const index = fileDetails.findIndex(detail => detail.file.name === file.name);
+            if (index > -1) {
+                // Remove from fileDetails array
+                fileDetails.splice(index, 1);
+            }
             filePreviewContainer.removeChild(filePreview);
         });
 
