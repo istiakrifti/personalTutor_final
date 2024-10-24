@@ -150,17 +150,20 @@ def upload_hw_view(request):
                 width, height = letter
 
                 for image in images:
+                    if image.mode != "RGB":
+                        image = image.convert("RGB")
+
                     img_byte_arr = io.BytesIO()
-                    format = 'PNG'
-                    if hasattr(image, 'format'):
-                        format = image.format 
-                    image.save(img_byte_arr, format=format)
+                    image.save(img_byte_arr, format='JPEG')  # Save image as JPEG
                     img_byte_arr.seek(0)
 
                     aspect_ratio = image.height / float(image.width)
                     img_width = width
                     img_height = width * aspect_ratio
-                    pdf.drawImage(ImageReader(img_byte_arr), 0, height - img_height, width=img_width, height=img_height)
+
+                    # Use ImageReader to pass the correct image format to ReportLab
+                    img_reader = ImageReader(img_byte_arr)
+                    pdf.drawImage(img_reader, 0, height - img_height, width=img_width, height=img_height)
                     pdf.showPage()
 
                 pdf.save()

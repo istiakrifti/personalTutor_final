@@ -20,7 +20,6 @@ import dj_database_url
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -121,23 +120,23 @@ WSGI_APPLICATION = 'PersonalTutor.wsgi.application'
 #     }
 # }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'personaldb_4usd',
-#         'USER': 'personaldb_4usd_user',
-#         'PASSWORD': 'tcnyxxAvx3HlQUw7FxThyQeHj9LKBOwv',
-#         'HOST': 'dpg-csa09jbqf0us739oghg0-a.oregon-postgres.render.com',
-#         'PORT': '5432',
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'personaldb_4usd',
+        'USER': 'personaldb_4usd_user',
+        'PASSWORD': 'tcnyxxAvx3HlQUw7FxThyQeHj9LKBOwv',
+        'HOST': 'dpg-csa09jbqf0us739oghg0-a.oregon-postgres.render.com',
+        'PORT': '5432',
+    }
+}
 
 # DATABASES = {
 #     'defaults': dj_database_url.parse("postgresql://personaldb_4usd_user:tcnyxxAvx3HlQUw7FxThyQeHj9LKBOwv@dpg-csa09jbqf0us739oghg0-a.oregon-postgres.render.com/personaldb_4usd")
 # }
-DATABASES = {
-    'default': dj_database_url.parse(database_url)
-}
+# DATABASES = {
+#     'default': dj_database_url.parse(database_url)
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -200,3 +199,4 @@ EMAIL_HOST_USER = 'personaltutor1515@gmail.com'
 EMAIL_HOST_PASSWORD = 'zums qkjt drbf citc'
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
+
