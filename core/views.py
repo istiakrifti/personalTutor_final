@@ -363,13 +363,14 @@ def create_folder(request, user_id, folder_id=None):
         if folder_name:
             parent_folder = get_object_or_404(Folder, id=folder_id) if folder_id else None
             
-            existing_folder = Folder.objects.filter(name=folder_name, parent_folder=parent_folder).first()
+            user_profile = UserProfile.objects.filter(id=user_id).first()
+            existing_folder = Folder.objects.filter(name=folder_name, parent_folder=parent_folder, user_profile=user_profile).first()
             if existing_folder:
                 messages.error(request, 'A folder with this name already exists in the same parent folder.')
             else:
                 try:
                     # user_id = request.session.get('student_id')
-                    user_profile = UserProfile.objects.filter(id=user_id).first()
+                    
                     Folder.objects.create(name=folder_name, parent_folder=parent_folder, user_profile=user_profile)
                     messages.success(request, 'Folder created successfully.')
                 except Exception as e:
